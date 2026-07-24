@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, InsertContact, contacts, InsertDonation, donations, InsertVolunteer, volunteers } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,43 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function createContact(data: InsertContact) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(contacts).values(data);
+  return result;
+}
+
+export async function getContacts() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(contacts).orderBy(contacts.createdAt);
+}
+
+export async function createDonation(data: InsertDonation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(donations).values(data);
+  return result;
+}
+
+export async function getDonations() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(donations).orderBy(donations.createdAt);
+}
+
+export async function createVolunteer(data: InsertVolunteer) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(volunteers).values(data);
+  return result;
+}
+
+export async function getVolunteers() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(volunteers).orderBy(volunteers.createdAt);
+}
+
+// TODO: add additional feature queries here as your schema grows.

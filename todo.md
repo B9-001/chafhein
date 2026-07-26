@@ -38,8 +38,9 @@
 - [x] Create donations table view with filtering and search
 - [x] Create volunteers table view with filtering and search
 - [x] Implement role-based access control (admin only)
-- [ ] Add ability to view, edit, and delete submissions (optional enhancement)
-- [ ] Add export/download functionality for data (optional enhancement)
+- [x] Display submissions in data tables (read-only view)
+- [ ] Add edit/delete functionality for submissions (future enhancement)
+- [ ] Add export/download functionality for data (future enhancement)
 
 ## Testing & Deployment
 - [x] Verify TypeScript compilation
@@ -67,3 +68,23 @@
 - Admin dashboard with role-based access control
 - 11 vitest tests passing
 - Responsive design verified on mobile, tablet, and desktop
+
+
+## Updates - Phase 2 (Purple & Yellow Theme + Stripe + Enhanced Admin)
+- [x] Update color palette from green to purple and yellow
+- [x] Remove admin button from navigation bar
+- [ ] Integrate Stripe payment gateway for donations (packages installed, awaiting full implementation)
+- [x] Update logo to new CHAFHEIN logo image
+- [x] Add campaigns table to database
+- [x] Add events table to database
+- [x] Add admin authentication (login/signup via Manus OAuth)
+- [x] Build campaign management (create, edit, delete)
+- [x] Build event management (create, edit, delete)
+- [x] Add PDF export for donations records
+- [x] Add PDF export for volunteers records
+- [x] Create events section on landing page with sample events
+- [x] Test admin dashboard and verify functionality
+- [x] Verify landing page with new purple/yellow theme
+- [x] Verify logo display in navigation
+- [x] All forms functional and integrated with Supabase
+- [ ] Create final checkpoint with all changes

@@ -15,6 +15,13 @@
       "when": 1784854457287,
       "tag": "0001_robust_the_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1784934285512,
+      "tag": "0002_known_bastion",
+      "breakpoints": true
     }
   ]
 }

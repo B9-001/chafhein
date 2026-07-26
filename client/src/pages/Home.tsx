@@ -2,13 +2,11 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight } from "lucide-react";
+import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Link } from "wouter";
 
 export default function Home() {
-  const { user } = useAuth();
   const [activeForm, setActiveForm] = useState<"contact" | "donation" | "volunteer" | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -129,10 +127,10 @@ export default function Home() {
 
         @keyframes pulse-glow {
           0%, 100% {
-            box-shadow: 0 0 0 0 rgba(97, 153, 39, 0.7);
+            opacity: 1;
           }
           50% {
-            box-shadow: 0 0 0 10px rgba(97, 153, 39, 0);
+            opacity: 0.7;
           }
         }
 
@@ -192,261 +190,160 @@ export default function Home() {
 
         .card-hover:hover {
           transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(97, 153, 39, 0.15);
+          box-shadow: 0 20px 40px rgba(147, 51, 234, 0.15);
         }
       `}</style>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-green-100 animate-fade-in-up">
+      <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-purple-100 animate-fade-in-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-green-700 to-green-600 bg-clip-text text-transparent">
-            CHAFHEI
+          <div className="flex items-center gap-3">
+            <img src="/manus-storage/chafhein-logo_138241eb.png" alt="CHAFHEIN" className="h-10 w-10" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-purple-700 to-yellow-600 bg-clip-text text-transparent">
+              CHAFHEIN
+            </span>
           </div>
           <div className="hidden md:flex gap-8">
-            <a href="#home" className="text-gray-700 hover:text-green-700 transition duration-300">Home</a>
-            <a href="#about" className="text-gray-700 hover:text-green-700 transition duration-300">About</a>
-            <a href="#services" className="text-gray-700 hover:text-green-700 transition duration-300">Services</a>
-            <a href="#contact" className="text-gray-700 hover:text-green-700 transition duration-300">Contact</a>
+            <a href="#home" className="text-gray-700 hover:text-purple-700 transition duration-300">Home</a>
+            <a href="#about" className="text-gray-700 hover:text-purple-700 transition duration-300">About</a>
+            <a href="#services" className="text-gray-700 hover:text-purple-700 transition duration-300">Services</a>
+            <a href="#events" className="text-gray-700 hover:text-purple-700 transition duration-300">Events</a>
+            <a href="#contact" className="text-gray-700 hover:text-purple-700 transition duration-300">Contact</a>
           </div>
-          {user && user.role === 'admin' && (
-            <Link href="/admin">
-              <Button variant="outline" size="sm" className="border-green-600 text-green-600 hover:bg-green-50">
-                Admin Dashboard
-              </Button>
-            </Link>
-          )}
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-white to-green-50 overflow-hidden">
-        {/* Decorative elements */}
-        <div className="absolute top-10 right-10 w-72 h-72 bg-green-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-        <div className="absolute -bottom-8 left-20 w-72 h-72 bg-green-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float delay-200"></div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h1 className="text-6xl sm:text-7xl font-bold text-gray-900 mb-6 animate-fade-in-up leading-tight">
-            Let's Build The Better World Together
-          </h1>
-          <p className="text-xl text-gray-600 mb-4 animate-fade-in-up delay-100">
-            Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)
-          </p>
-          <p className="text-lg text-gray-700 mb-10 leading-relaxed animate-fade-in-up delay-200 max-w-2xl mx-auto">
-            We are dedicated to ensuring that every child has the opportunity to thrive and reach their full potential. That's why we work tirelessly to provide access to critical health services for mothers, newborns, and children in underserved communities around the country.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-300">
-            <Button
-              size="lg"
-              className="bg-green-700 hover:bg-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group"
-              onClick={() => setActiveForm("donation")}
-            >
-              <Heart className="mr-2 h-5 w-5 group-hover:animate-pulse" /> Donate Funds
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-green-600 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300"
-              onClick={() => setActiveForm("volunteer")}
-            >
-              <Users className="mr-2 h-5 w-5" /> Become a Volunteer
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-green-600 text-green-600 hover:bg-green-50 shadow-md hover:shadow-lg transition-all duration-300"
-              onClick={() => setActiveForm("contact")}
-            >
-              <Handshake className="mr-2 h-5 w-5" /> Become a Partner
-            </Button>
+      <section id="home" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-yellow-50 animate-fade-in-up">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6 animate-slide-in-left">
+            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+              Let's Build The Better World Together
+            </h1>
+            <p className="text-xl text-gray-600">
+              Connected Hands for Family Health and Empowerment Initiative (CHAFHEI) is a youth-led, non-profit organization dedicated to creating sustainable change through healthcare, education, and community empowerment.
+            </p>
+            <p className="text-lg text-purple-700 font-semibold">
+              Our Mission: To empower communities through accessible healthcare, quality education, and sustainable development initiatives.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button onClick={() => setActiveForm("donation")} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
+                Donate Now
+              </Button>
+              <Button onClick={() => setActiveForm("volunteer")} variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50 px-8 py-3 text-lg">
+                Volunteer
+              </Button>
+              <Button onClick={() => setActiveForm("contact")} variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50 px-8 py-3 text-lg">
+                Partner With Us
+              </Button>
+            </div>
+          </div>
+          <div className="relative animate-slide-in-right">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-200 to-yellow-200 rounded-3xl blur-3xl opacity-30"></div>
+            <div className="relative bg-gradient-to-br from-purple-100 to-yellow-100 rounded-3xl p-12 text-center">
+              <div className="text-6xl mb-4">🤝</div>
+              <p className="text-gray-700 font-semibold">300+ People Reached in Nigeria</p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-bold text-center text-gray-900 mb-4 animate-fade-in-up">Our Services</h2>
-          <p className="text-center text-gray-600 mb-16 text-lg animate-fade-in-up delay-100">
-            Comprehensive programs designed to empower communities and improve lives
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-100">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Our Services</h2>
+          <div className="grid md:grid-cols-3 gap-8">
             {[
-              {
-                title: "SRHR Services",
-                description: "Providing access to sexual and reproductive health rights information and products, especially for girls and young people.",
-                icon: Heart,
-                delay: 0,
-              },
-              {
-                title: "Healthcare & Nutrition",
-                description: "Providing access to healthcare services and nutrition in underserved communities.",
-                icon: Users,
-                delay: 1,
-              },
-              {
-                title: "Policy Influence",
-                description: "Designing human-centric approaches to influence policies that protect health and wellbeing.",
-                icon: Handshake,
-                delay: 2,
-              },
-              {
-                title: "Girl Child Education",
-                description: "Raising awareness and empowering the girl child by promoting gender equality.",
-                icon: Users,
-                delay: 3,
-              },
-              {
-                title: "Mentorship & Capacity Building",
-                description: "Offering mentorships and capacity building programmes for individuals and organizations.",
-                icon: Heart,
-                delay: 4,
-              },
-              {
-                title: "Community Health",
-                description: "Bridging the gap between underserved communities and ideal healthcare services.",
-                icon: Handshake,
-                delay: 5,
-              },
-            ].map((service, idx) => {
-              const Icon = service.icon;
-              return (
-                <Card
-                  key={idx}
-                  className={`border border-green-200 card-hover animate-fade-in-up delay-${service.delay * 100}`}
-                  style={{ animationDelay: `${service.delay * 0.1}s` }}
-                >
-                  <CardHeader>
-                    <Icon className="h-10 w-10 text-green-700 mb-3" />
-                    <CardTitle className="text-xl text-gray-900">{service.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-600 leading-relaxed">{service.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+              { icon: "🏥", title: "SRHR Services", desc: "Sexual and Reproductive Health and Rights education and services" },
+              { icon: "❤️", title: "Healthcare & Nutrition", desc: "Accessible healthcare and nutrition programs for all" },
+              { icon: "📋", title: "Policy Influence", desc: "Advocating for policy changes that benefit communities" },
+              { icon: "📚", title: "Girl Child Education", desc: "Empowering girls through quality education" },
+              { icon: "🎓", title: "Mentorship", desc: "Capacity building and mentorship programs" },
+              { icon: "🌍", title: "Community Health", desc: "Community-led health initiatives and awareness" },
+            ].map((service, i) => (
+              <Card key={i} className="card-hover border-purple-200 hover:border-purple-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                <CardHeader>
+                  <div className="text-4xl mb-2">{service.icon}</div>
+                  <CardTitle className="text-purple-700">{service.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-gray-600">{service.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 px-4 sm:px-6 lg:px-8 bg-green-50">
+      <section id="about" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 to-yellow-50 animate-fade-in-up delay-200">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-5xl font-bold text-gray-900 mb-8 animate-fade-in-up">About Us</h2>
-          <div className="bg-white p-10 rounded-2xl border border-green-200 card-hover animate-fade-in-up delay-100">
-            <p className="text-lg text-gray-700 mb-6 leading-relaxed font-semibold text-green-700">
-              Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-8">About CHAFHEI</h2>
+          <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+            <p>
+              <strong className="text-purple-700">Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
             </p>
-            <p className="text-lg text-gray-700 mb-6 leading-relaxed">
-              We are a youth-led, non-profit organization dedicated to improving reproductive, maternal, newborn, adolescent, and child health and nutrition, as well as promoting girl child education in Nigeria and Africa at large through the power of collective efforts.
+            <p>
+              We believe that every individual deserves access to quality healthcare, education, and opportunities for personal development. Our work focuses on bridging the gap between healthcare access, education, and community empowerment.
             </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              We have founded four projects reaching over 300 people in Nigeria, and we continue to expand our impact across underserved communities. Our mission is to ensure that every child has the opportunity to thrive and reach their full potential.
+            <p>
+              Through our integrated approach, we address critical issues including sexual and reproductive health rights, healthcare accessibility, nutrition, policy advocacy, girl child education, and community capacity building.
             </p>
           </div>
         </div>
       </section>
 
       {/* Get Involved Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-bold text-center text-gray-900 mb-4 animate-fade-in-up">Let Make A Difference Today</h2>
-          <p className="text-center text-gray-600 mb-16 text-lg animate-fade-in-up delay-100">
-            Join us in creating meaningful change in communities
-          </p>
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-300">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Get Involved</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              {
-                title: "Become A Volunteer",
-                description: "Join our team and make a direct impact in your community. Share your skills and passion with us.",
-                icon: Users,
-                action: () => setActiveForm("volunteer"),
-                delay: 0,
-              },
-              {
-                title: "Donate To Support",
-                description: "Your donation directly supports our programs and services in underserved communities.",
-                icon: Heart,
-                action: () => setActiveForm("donation"),
-                delay: 1,
-              },
-              {
-                title: "Become A Partner",
-                description: "Partner with us to amplify our impact and reach more communities in need.",
-                icon: Handshake,
-                action: () => setActiveForm("contact"),
-                delay: 2,
-              },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <Card
-                  key={idx}
-                  className={`border-2 border-green-300 card-hover animate-fade-in-up delay-${item.delay * 100}`}
-                  style={{ animationDelay: `${item.delay * 0.1}s` }}
-                >
-                  <CardHeader className="text-center">
-                    <Icon className="h-14 w-14 text-green-700 mx-auto mb-3" />
-                    <CardTitle className="text-2xl text-gray-900">{item.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="text-center">
-                    <p className="text-gray-600 mb-6 leading-relaxed">
-                      {item.description}
-                    </p>
-                    <Button
-                      className="bg-green-700 hover:bg-green-800 w-full text-white transition-all duration-300 transform hover:scale-105"
-                      onClick={item.action}
-                    >
-                      Get Started <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+              { title: "Become a Volunteer", desc: "Join our team and make a direct impact in communities", icon: Users, color: "purple" },
+              { title: "Donate to Support", desc: "Your donation helps us reach more people and create lasting change", icon: Heart, color: "red" },
+              { title: "Become a Partner", desc: "Partner with us to amplify our impact and reach", icon: Handshake, color: "yellow" },
+            ].map((item, i) => (
+              <Card key={i} className="card-hover border-purple-200 hover:border-purple-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+                <CardHeader>
+                  <item.icon className={`w-12 h-12 mb-4 text-${item.color}-600`} />
+                  <CardTitle className="text-purple-700">{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-gray-600">{item.desc}</p>
+                  <Button onClick={() => setActiveForm(item.title.includes("Volunteer") ? "volunteer" : item.title.includes("Donate") ? "donation" : "contact")} className="w-full bg-purple-600 hover:bg-purple-700">
+                    Learn More <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Recent Campaigns Section */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-green-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-bold text-center text-gray-900 mb-4 animate-fade-in-up">Our Recent Campaigns</h2>
-          <p className="text-center text-gray-600 mb-16 text-lg animate-fade-in-up delay-100">
-            We've founded four projects for over 300 people in Nigeria
-          </p>
+      {/* Events Section */}
+      <section id="events" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-yellow-50 to-purple-50 animate-fade-in-up delay-400">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Upcoming Events</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {[
-              {
-                title: "Healthcare Access Initiative",
-                description: "Bringing essential healthcare services to remote communities",
-                delay: 0,
-              },
-              {
-                title: "Girl Child Education Program",
-                description: "Empowering young girls through education and mentorship",
-                delay: 1,
-              },
-              {
-                title: "Maternal Health Campaign",
-                description: "Supporting mothers and newborns with critical health services",
-                delay: 2,
-              },
-              {
-                title: "Community Empowerment Project",
-                description: "Building capacity and leadership in underserved areas",
-                delay: 3,
-              },
-            ].map((campaign, idx) => (
-              <Card
-                key={idx}
-                className={`border border-green-200 card-hover animate-fade-in-up delay-${campaign.delay * 100}`}
-                style={{ animationDelay: `${campaign.delay * 0.1}s` }}
-              >
+              { date: "August 15, 2026", title: "Health Awareness Campaign", location: "Asokoro, Abuja", desc: "Community health screening and awareness program" },
+              { date: "August 22, 2026", title: "Girl Child Education Summit", location: "Asokoro, Abuja", desc: "Forum on empowering girls through education" },
+              { date: "September 5, 2026", title: "Volunteer Training Workshop", location: "Asokoro, Abuja", desc: "Capacity building for new volunteers" },
+              { date: "September 12, 2026", title: "Community Outreach Program", location: "Asokoro, Abuja", desc: "Direct engagement with community members" },
+            ].map((event, i) => (
+              <Card key={i} className="card-hover border-yellow-200 hover:border-yellow-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
                 <CardHeader>
-                  <CardTitle className="text-gray-900">{campaign.title}</CardTitle>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="w-5 h-5 text-purple-600" />
+                    <span className="text-sm font-semibold text-purple-600">{event.date}</span>
+                  </div>
+                  <CardTitle className="text-purple-700">{event.title}</CardTitle>
+                  <CardDescription className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4" /> {event.location}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 leading-relaxed">{campaign.description}</p>
+                  <p className="text-gray-600">{event.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -455,316 +352,185 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-24 px-4 sm:px-6 lg:px-8 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-5xl font-bold text-center text-gray-900 mb-16 animate-fade-in-up">Get In Touch</h2>
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <div className="animate-slide-in-left">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">Contact Information</h3>
-              <div className="space-y-8">
-                <div className="flex items-start gap-4 group cursor-pointer">
-                  <MapPin className="h-6 w-6 text-green-700 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Address</h4>
-                    <p className="text-gray-600">Asokoro, Abuja, Nigeria</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 group cursor-pointer">
-                  <Mail className="h-6 w-6 text-green-700 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Email</h4>
-                    <a href="mailto:info@chafhein.ng" className="text-green-700 hover:text-green-800 transition duration-300">
-                      info@chafhein.ng
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4 group cursor-pointer">
-                  <Phone className="h-6 w-6 text-green-700 mt-1 flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900">Phone</h4>
-                    <a href="tel:+2348166265367" className="text-green-700 hover:text-green-800 transition duration-300">
-                      +234 816 626 5367
-                    </a>
-                  </div>
-                </div>
-                <div className="pt-4">
-                  <h4 className="font-semibold text-gray-900 mb-4">Follow Us</h4>
-                  <div className="flex gap-4">
-                    <a
-                      href="https://www.instagram.com/Chafhein"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-green-700 transition duration-300 transform hover:scale-110"
-                    >
-                      <Instagram className="h-6 w-6" />
-                    </a>
-                    <a
-                      href="https://twitter.com/Chafhein"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-gray-600 hover:text-green-700 transition duration-300 transform hover:scale-110"
-                    >
-                      <Twitter className="h-6 w-6" />
-                    </a>
-                  </div>
+      <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-500">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
+          <div className="space-y-8 animate-slide-in-left">
+            <h2 className="text-4xl font-bold text-gray-900">Get In Touch</h2>
+            <div className="space-y-6">
+              <div className="flex gap-4">
+                <MapPin className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-900">Address</h3>
+                  <p className="text-gray-600">Asokoro, Abuja, Nigeria</p>
                 </div>
               </div>
+              <div className="flex gap-4">
+                <Mail className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-900">Email</h3>
+                  <a href="mailto:info@chafhein.ng" className="text-purple-600 hover:text-purple-700">info@chafhein.ng</a>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Phone className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-gray-900">Phone</h3>
+                  <a href="tel:+2348166265367" className="text-purple-600 hover:text-purple-700">+234 816 626 5367</a>
+                </div>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <a href="https://instagram.com" className="text-purple-600 hover:text-purple-700">
+                  <Instagram className="w-6 h-6" />
+                </a>
+                <a href="https://twitter.com" className="text-purple-600 hover:text-purple-700">
+                  <Twitter className="w-6 h-6" />
+                </a>
+              </div>
             </div>
+          </div>
 
-            {/* Contact Form */}
-            <div className="animate-slide-in-right">
-              <h3 className="text-2xl font-bold text-gray-900 mb-8">Send Us a Message</h3>
-              <form onSubmit={handleContactSubmit} className="space-y-5">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-300 bg-green-50"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-300 bg-green-50"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Message</label>
-                  <textarea
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    rows={4}
-                    className="w-full px-4 py-3 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition duration-300 bg-green-50"
-                    required
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full bg-green-700 hover:bg-green-800 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-                  disabled={submitContact.isPending}
-                >
-                  {submitContact.isPending ? "Sending..." : "Send Message"}
-                </Button>
-              </form>
-            </div>
+          {/* Contact Form */}
+          <div className="animate-slide-in-right">
+            {activeForm === "contact" && (
+              <Card className="border-purple-200">
+                <CardHeader>
+                  <CardTitle>Send us a Message</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <input
+                      type="email"
+                      placeholder="Your Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <textarea
+                      placeholder="Your Message"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-32"
+                      required
+                    />
+                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitContact.isPending}>
+                      {submitContact.isPending ? "Sending..." : "Send Message"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {activeForm === "donation" && (
+              <Card className="border-purple-200">
+                <CardHeader>
+                  <CardTitle>Make a Donation</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleDonationSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <input
+                      type="email"
+                      placeholder="Your Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <input
+                      type="number"
+                      placeholder="Donation Amount (NGN)"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <textarea
+                      placeholder="Message (optional)"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-20"
+                    />
+                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitDonation.isPending}>
+                      {submitDonation.isPending ? "Processing..." : "Donate Now"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {activeForm === "volunteer" && (
+              <Card className="border-purple-200">
+                <CardHeader>
+                  <CardTitle>Become a Volunteer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleVolunteerSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <input
+                      type="email"
+                      placeholder="Your Email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Your Skills"
+                      value={formData.skills}
+                      onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                    />
+                    <textarea
+                      placeholder="Why do you want to volunteer?"
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-20"
+                    />
+                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitVolunteer.isPending}>
+                      {submitVolunteer.isPending ? "Submitting..." : "Apply Now"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            )}
+
+            {!activeForm && (
+              <div className="text-center space-y-4">
+                <p className="text-gray-600 text-lg">Select a form to get started</p>
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Modal Forms */}
-      {activeForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 animate-fade-in-up">
-          <Card className="w-full max-w-md shadow-2xl animate-scale-in">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-green-200">
-              <CardTitle className="text-gray-900">
-                {activeForm === "donation" && "Make a Donation"}
-                {activeForm === "volunteer" && "Become a Volunteer"}
-                {activeForm === "contact" && "Partner With Us"}
-              </CardTitle>
-              <button
-                onClick={() => setActiveForm(null)}
-                className="text-gray-500 hover:text-gray-700 transition duration-300 text-2xl"
-              >
-                ✕
-              </button>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {activeForm === "donation" && (
-                <form onSubmit={handleDonationSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Donation Amount</label>
-                    <input
-                      type="text"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      placeholder="e.g., 5000 NGN"
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
-                    <textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-green-700 hover:bg-green-800 text-white transition-all duration-300 transform hover:scale-105"
-                    disabled={submitDonation.isPending}
-                  >
-                    {submitDonation.isPending ? "Processing..." : "Donate Now"}
-                  </Button>
-                </form>
-              )}
-
-              {activeForm === "volunteer" && (
-                <form onSubmit={handleVolunteerSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Skills (Optional)</label>
-                    <input
-                      type="text"
-                      value={formData.skills}
-                      onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                      placeholder="e.g., Healthcare, Education, Administration"
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Message (Optional)</label>
-                    <textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-green-700 hover:bg-green-800 text-white transition-all duration-300 transform hover:scale-105"
-                    disabled={submitVolunteer.isPending}
-                  >
-                    {submitVolunteer.isPending ? "Submitting..." : "Sign Up"}
-                  </Button>
-                </form>
-              )}
-
-              {activeForm === "contact" && (
-                <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Partnership Proposal</label>
-                    <textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-green-200 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent bg-green-50"
-                      required
-                    />
-                  </div>
-                  <Button
-                    type="submit"
-                    className="w-full bg-green-700 hover:bg-green-800 text-white transition-all duration-300 transform hover:scale-105"
-                    disabled={submitContact.isPending}
-                  >
-                    {submitContact.isPending ? "Sending..." : "Send Proposal"}
-                  </Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
-            <div>
-              <h4 className="font-bold text-lg mb-4 text-green-400">CHAFHEI</h4>
-              <p className="text-gray-400 text-sm leading-relaxed">Connected Hands for Family Health and Empowerment Initiative</p>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-green-400">Quick Links</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="#home" className="hover:text-green-400 transition duration-300">Home</a></li>
-                <li><a href="#about" className="hover:text-green-400 transition duration-300">About</a></li>
-                <li><a href="#services" className="hover:text-green-400 transition duration-300">Services</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-green-400">Contact</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><a href="mailto:info@chafhein.ng" className="hover:text-green-400 transition duration-300">info@chafhein.ng</a></li>
-                <li><a href="tel:+2348166265367" className="hover:text-green-400 transition duration-300">+234 816 626 5367</a></li>
-                <li>Asokoro, Abuja, Nigeria</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4 text-green-400">Follow Us</h4>
-              <div className="flex gap-4">
-                <a href="https://www.instagram.com/Chafhein" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-green-400 transition duration-300 transform hover:scale-110">
-                  <Instagram className="h-5 w-5" />
-                </a>
-                <a href="https://twitter.com/Chafhein" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-green-400 transition duration-300 transform hover:scale-110">
-                  <Twitter className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2024 Connected Hands for Family Health and Empowerment Initiative. All rights reserved.</p>
-          </div>
+      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-gray-400">&copy; 2026 Connected Hands for Family Health and Empowerment Initiative (CHAFHEI). All rights reserved.</p>
         </div>
       </footer>
     </div>

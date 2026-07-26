@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers } from "./db";
+import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers, createCampaign, getCampaigns, updateCampaign, deleteCampaign, createEvent, getEvents, updateEvent, deleteEvent } from "./db";
 
 export const appRouter = router({
   system: systemRouter,
@@ -88,6 +88,137 @@ export const appRouter = router({
       })
       .query(async () => {
         return await getVolunteers();
+      }),
+
+    getCampaigns: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .query(async () => {
+        return await getCampaigns();
+      }),
+
+    createCampaign: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({
+        title: z.string().min(1, "Title is required"),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        targetAmount: z.string().optional(),
+        status: z.enum(["active", "completed", "paused"]).default("active"),
+      }))
+      .mutation(async ({ input }) => {
+        await createCampaign(input);
+        return { success: true, message: "Campaign created" };
+      }),
+
+    updateCampaign: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        targetAmount: z.string().optional(),
+        currentAmount: z.string().optional(),
+        status: z.enum(["active", "completed", "paused"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateCampaign(id, data);
+        return { success: true, message: "Campaign updated" };
+      }),
+
+    deleteCampaign: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteCampaign(input.id);
+        return { success: true, message: "Campaign deleted" };
+      }),
+
+    getEvents: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .query(async () => {
+        return await getEvents();
+      }),
+
+    createEvent: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({
+        title: z.string().min(1, "Title is required"),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        date: z.string().min(1, "Date is required"),
+        location: z.string().optional(),
+        status: z.enum(["upcoming", "ongoing", "completed"]).default("upcoming"),
+      }))
+      .mutation(async ({ input }) => {
+        await createEvent(input);
+        return { success: true, message: "Event created" };
+      }),
+
+    updateEvent: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({
+        id: z.number(),
+        title: z.string().optional(),
+        description: z.string().optional(),
+        imageUrl: z.string().optional(),
+        date: z.string().optional(),
+        location: z.string().optional(),
+        status: z.enum(["upcoming", "ongoing", "completed"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateEvent(id, data);
+        return { success: true, message: "Event updated" };
+      }),
+
+    deleteEvent: protectedProcedure
+      .use(async ({ ctx, next }) => {
+        if (ctx.user?.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+        return next({ ctx });
+      })
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteEvent(input.id);
+        return { success: true, message: "Event deleted" };
       }),
   }),
 });

@@ -59,3 +59,33 @@ export const volunteers = mysqlTable("volunteers", {
 
 export type Volunteer = typeof volunteers.$inferSelect;
 export type InsertVolunteer = typeof volunteers.$inferInsert;
+
+export const campaigns = mysqlTable("campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  imageUrl: text("imageUrl"),
+  targetAmount: varchar("targetAmount", { length: 100 }),
+  currentAmount: varchar("currentAmount", { length: 100 }).default("0"),
+  status: mysqlEnum("status", ["active", "completed", "paused"]).default("active"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Campaign = typeof campaigns.$inferSelect;
+export type InsertCampaign = typeof campaigns.$inferInsert;
+
+export const events = mysqlTable("events", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  imageUrl: text("imageUrl"),
+  date: varchar("date", { length: 100 }).notNull(),
+  location: varchar("location", { length: 255 }),
+  status: mysqlEnum("status", ["upcoming", "ongoing", "completed"]).default("upcoming"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = typeof events.$inferInsert;

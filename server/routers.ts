@@ -5,6 +5,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers, createCampaign, getCampaigns, updateCampaign, deleteCampaign, createEvent, getEvents, updateEvent, deleteEvent } from "./db";
+import { createCheckoutSession } from "./stripe";
 
 export const appRouter = router({
   system: systemRouter,
@@ -53,6 +54,22 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await createVolunteer(input);
         return { success: true, message: "Volunteer application received" };
+      }),
+
+    createStripeCheckout: publicProcedure
+      .input(z.object({
+        amount: z.number().min(1, "Amount must be greater than 0"),
+        donorName: z.string().min(1, "Name is required"),
+        donorEmail: z.string().email("Invalid email"),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const session = await createCheckoutSession(input.amount, input.donorEmail, input.donorName);
+          return { success: true, sessionId: session.id, url: session.url };
+        } catch (error) {
+          console.error("Stripe error:", error);
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create payment session' });
+        }
       }),
   }),
 

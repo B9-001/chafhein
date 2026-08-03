@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar } from "lucide-react";
+import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar, Menu, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeForm, setActiveForm] = useState<"contact" | "donation" | "volunteer" | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -203,6 +204,8 @@ export default function Home() {
               CHAFHEIN
             </span>
           </div>
+          
+          {/* Desktop Navigation */}
           <div className="hidden md:flex gap-8">
             <a href="#home" className="text-gray-700 hover:text-purple-700 transition duration-300">Home</a>
             <a href="#about" className="text-gray-700 hover:text-purple-700 transition duration-300">About</a>
@@ -210,30 +213,85 @@ export default function Home() {
             <a href="#events" className="text-gray-700 hover:text-purple-700 transition duration-300">Events</a>
             <a href="#contact" className="text-gray-700 hover:text-purple-700 transition duration-300">Contact</a>
           </div>
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 hover:bg-purple-100 rounded-lg transition duration-300"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6 text-purple-700" />
+            ) : (
+              <Menu className="w-6 h-6 text-purple-700" />
+            )}
+          </button>
         </div>
+        
+        {/* Mobile Navigation Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-purple-100 animate-fade-in-up">
+            <div className="px-4 py-4 space-y-3">
+              <a
+                href="#home"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+              >
+                Home
+              </a>
+              <a
+                href="#about"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+              >
+                About
+              </a>
+              <a
+                href="#services"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+              >
+                Services
+              </a>
+              <a
+                href="#events"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+              >
+                Events
+              </a>
+              <a
+                href="#contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+              >
+                Contact
+              </a>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="relative py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-yellow-50 animate-fade-in-up">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 animate-slide-in-left">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
+      <section id="home" className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-yellow-50 animate-fade-in-up">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+          <div className="space-y-4 sm:space-y-6 animate-slide-in-left">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
               Let's Build The Better World Together
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600">
               Connected Hands for Family Health and Empowerment Initiative (CHAFHEI) is a youth-led, non-profit organization dedicated to creating sustainable change through healthcare, education, and community empowerment.
             </p>
-            <p className="text-lg text-purple-700 font-semibold">
+            <p className="text-base sm:text-lg text-purple-700 font-semibold">
               Our Mission: To empower communities through accessible healthcare, quality education, and sustainable development initiatives.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button onClick={() => setActiveForm("donation")} className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
+              <Button onClick={() => setActiveForm("donation")} className="bg-purple-600 hover:bg-purple-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Donate Now
               </Button>
-              <Button onClick={() => setActiveForm("volunteer")} variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50 px-8 py-3 text-lg">
+              <Button onClick={() => setActiveForm("volunteer")} variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50 px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Volunteer
               </Button>
-              <Button onClick={() => setActiveForm("contact")} variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50 px-8 py-3 text-lg">
+              <Button onClick={() => setActiveForm("contact")} variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50 px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Partner With Us
               </Button>
             </div>
@@ -249,10 +307,10 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-100">
+      <section id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-100">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Our Services</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Our Services</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               { icon: "🏥", title: "SRHR Services", desc: "Sexual and Reproductive Health and Rights education and services" },
               { icon: "❤️", title: "Healthcare & Nutrition", desc: "Accessible healthcare and nutrition programs for all" },
@@ -276,10 +334,10 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 to-yellow-50 animate-fade-in-up delay-200">
+      <section id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 to-yellow-50 animate-fade-in-up delay-200">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-8">About CHAFHEI</h2>
-          <div className="space-y-6 text-lg text-gray-700 leading-relaxed">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-8">About CHAFHEI</h2>
+          <div className="space-y-4 sm:space-y-6 text-base sm:text-lg text-gray-700 leading-relaxed">
             <p>
               <strong className="text-purple-700">Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
             </p>
@@ -294,10 +352,10 @@ export default function Home() {
       </section>
 
       {/* Get Involved Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-300">
+      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-300">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Get Involved</h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Get Involved</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               { title: "Become a Volunteer", desc: "Join our team and make a direct impact in communities", icon: Users, color: "purple" },
               { title: "Donate to Support", desc: "Your donation helps us reach more people and create lasting change", icon: Heart, color: "red" },
@@ -321,10 +379,10 @@ export default function Home() {
       </section>
 
       {/* Events Section */}
-      <section id="events" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-yellow-50 to-purple-50 animate-fade-in-up delay-400">
+      <section id="events" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-yellow-50 to-purple-50 animate-fade-in-up delay-400">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">Upcoming Events</h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Upcoming Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {[
               { date: "August 15, 2026", title: "Health Awareness Campaign", location: "Asokoro, Abuja", desc: "Community health screening and awareness program" },
               { date: "August 22, 2026", title: "Girl Child Education Summit", location: "Asokoro, Abuja", desc: "Forum on empowering girls through education" },
@@ -352,11 +410,11 @@ export default function Home() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-500">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
-          <div className="space-y-8 animate-slide-in-left">
-            <h2 className="text-4xl font-bold text-gray-900">Get In Touch</h2>
-            <div className="space-y-6">
+      <section id="contact" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-500">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+          <div className="space-y-6 sm:space-y-8 animate-slide-in-left">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Get In Touch</h2>
+            <div className="space-y-4 sm:space-y-6">
               <div className="flex gap-4">
                 <MapPin className="w-6 h-6 text-purple-600 flex-shrink-0" />
                 <div>
@@ -394,10 +452,10 @@ export default function Home() {
             {activeForm === "contact" && (
               <Card className="border-purple-200">
                 <CardHeader>
-                  <CardTitle>Send us a Message</CardTitle>
+                  <CardTitle className="text-2xl sm:text-3xl">Send us a Message</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <form onSubmit={handleContactSubmit} className="space-y-3 sm:space-y-4">
                     <input
                       type="text"
                       placeholder="Your Name"

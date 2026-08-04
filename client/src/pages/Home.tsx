@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar, Menu, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { PaystackButton } from "react-paystack";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -61,12 +62,33 @@ export default function Home() {
 
   const handleDonationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.amount || !formData.name || !formData.email) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+  };
+
+  const paystackConfig = {
+    reference: `CHAFHEI-${Date.now()}`,
+    email: formData.email,
+    amount: parseInt(formData.amount || '0') * 100,
+    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_d62a19c25a9338eb2d7009f86eb1ebc35abcdbb8',
+  };
+
+  const handlePaystackSuccess = (reference: any) => {
     submitDonation.mutate({
       amount: formData.amount,
       donorName: formData.name,
       donorEmail: formData.email,
       message: formData.message,
     });
+    toast.success(`Payment successful! Reference: ${reference.reference}`);
+    setFormData({ name: '', email: '', message: '', amount: '', skills: '' });
+    setActiveForm(null);
+  };
+
+  const handlePaystackClose = () => {
+    toast.error('Payment window closed');
   };
 
   const handleVolunteerSubmit = (e: React.FormEvent) => {
@@ -524,9 +546,13 @@ export default function Home() {
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                       className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-20"
                     />
-                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitDonation.isPending}>
-                      {submitDonation.isPending ? "Processing..." : "Donate Now"}
-                    </Button>
+                    <PaystackButton
+                      text="Donate Now"
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-300"
+                      {...paystackConfig}
+                      onSuccess={handlePaystackSuccess}
+                      onClose={handlePaystackClose}
+                    />
                   </form>
                 </CardContent>
               </Card>

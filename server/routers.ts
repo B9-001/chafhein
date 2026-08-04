@@ -1,10 +1,10 @@
-import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { COOKIE_NAME } from "@shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers, createCampaign, getCampaigns, updateCampaign, deleteCampaign, createEvent, getEvents, updateEvent, deleteEvent } from "./db";
+import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers, createCampaign, getCampaigns, updateCampaign, deleteCampaign, createEvent, getEvents, updateEvent, deleteEvent } from "./supabase";
 import { createCheckoutSession } from "./stripe";
 
 export const appRouter = router({
@@ -52,7 +52,12 @@ export const appRouter = router({
         message: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        await createVolunteer(input);
+        await createVolunteer({
+          name: input.name,
+          email: input.email,
+          skills: input.skills || '',
+          message: input.message,
+        });
         return { success: true, message: "Volunteer application received" };
       }),
 
@@ -133,7 +138,13 @@ export const appRouter = router({
         status: z.enum(["active", "completed", "paused"]).default("active"),
       }))
       .mutation(async ({ input }) => {
-        await createCampaign(input);
+        await createCampaign({
+          title: input.title,
+          description: input.description || '',
+          image: input.imageUrl,
+          targetAmount: input.targetAmount ? parseInt(input.targetAmount) : undefined,
+          status: input.status,
+        });
         return { success: true, message: "Campaign created" };
       }),
 
@@ -154,8 +165,12 @@ export const appRouter = router({
         status: z.enum(["active", "completed", "paused"]).optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await updateCampaign(id, data);
+        const { id, targetAmount, currentAmount, ...data } = input;
+        await updateCampaign(id, {
+          ...data,
+          targetAmount: targetAmount ? parseInt(targetAmount) : undefined,
+          currentAmount: currentAmount ? parseInt(currentAmount) : undefined,
+        });
         return { success: true, message: "Campaign updated" };
       }),
 
@@ -199,7 +214,14 @@ export const appRouter = router({
         status: z.enum(["upcoming", "ongoing", "completed"]).default("upcoming"),
       }))
       .mutation(async ({ input }) => {
-        await createEvent(input);
+        await createEvent({
+          title: input.title,
+          description: input.description || '',
+          image: input.imageUrl,
+          eventDate: input.date,
+          location: input.location,
+          status: input.status,
+        });
         return { success: true, message: "Event created" };
       }),
 

@@ -99,3 +99,24 @@
 - [x] Test responsive design on multiple viewports (mobile 375x812, tablet 768x1024, desktop 1280x720)
 - [x] Verify mobile menu animations
 - [x] Create checkpoint with mobile improvements
+
+
+## Paystack Payment Integration
+- [ ] Move Paystack public key to environment variables (VITE_PAYSTACK_PUBLIC_KEY)
+- [x] Update donation form to use Paystack checkout (client-side)
+- [ ] Add backend Paystack verification procedure
+- [ ] Test full donation payment flow end-to-end
+- [ ] Create checkpoint with complete Paystack integration
+
+
+## Supabase Backend Integration
+- [x] Add Supabase environment variables (URL and anon key)
+- [x] Install Supabase SDK
+- [x] Create Supabase client configuration (client and server)
+- [x] Update database queries to use Supabase
+- [x] Update routers to use Supabase functions
+- [x] Fix TypeScript errors and compile successfully
+- [x] Verify dev server running with Supabase integration
+- [x] Create all 5 Supabase tables (contacts, donations, volunteers, campaigns, events)
+- [x] Verify Supabase API connectivity
+- [x] Create checkpoint with Supabase integration

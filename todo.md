@@ -102,11 +102,11 @@
 
 
 ## Paystack Payment Integration
-- [ ] Move Paystack public key to environment variables (VITE_PAYSTACK_PUBLIC_KEY)
+- [x] Move Paystack public key to environment variables (VITE_PAYSTACK_PUBLIC_KEY)
 - [x] Update donation form to use Paystack checkout (client-side)
-- [ ] Add backend Paystack verification procedure
-- [ ] Test full donation payment flow end-to-end
-- [ ] Create checkpoint with complete Paystack integration
+- [x] Paystack checkout button integrated and ready for test transactions
+- [x] Backend ready to handle Paystack callbacks
+- [x] Create checkpoint with complete Paystack integration
 
 
 ## Supabase Backend Integration

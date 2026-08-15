@@ -3,9 +3,11 @@ type LogoProps = {
   title?: boolean;
 };
 
-// Brand mark now uses the official CHAFHEIN logo image, served from
+// Brand mark uses the official CHAFHEIN logo image, served from
 // client/public/logo.png so it works everywhere the app is hosted
-// (no external image dependency / no proxy that could 404).
+// (no external image dependency / no proxy that could 404). The
+// image already includes the CHAFHEIN wordmark, so we intentionally
+// don't render a separate text label next to it.
 export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
   return (
     <img
@@ -16,15 +18,6 @@ export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
   );
 }
 
-export function Logo({ className = "h-10 w-10", title = true }: LogoProps) {
-  return (
-    <div className="flex items-center gap-2.5">
-      <LogoMark className={className} />
-      {title && (
-        <span className="text-2xl font-bold bg-gradient-to-r from-purple-700 to-yellow-600 bg-clip-text text-transparent tracking-tight">
-          CHAFHEIN
-        </span>
-      )}
-    </div>
-  );
+export function Logo({ className = "h-10 w-10" }: LogoProps) {
+  return <LogoMark className={className} />;
 }

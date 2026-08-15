@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Download, LogOut, Loader2, Inbox } from "lucide-react";
+import { Plus, Edit2, Trash2, Download, LogOut, Loader2, Inbox, Upload } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
@@ -34,6 +34,76 @@ const emptyEventForm = {
   location: "",
   status: "upcoming" as EventStatus,
 };
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function ImageUploadField({ imageUrl, onChange }: { imageUrl: string; onChange: (url: string) => void }) {
+  const [isUploading, setIsUploading] = useState(false);
+  const uploadImageMutation = trpc.admin.uploadImage.useMutation();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be 8MB or smaller");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const dataBase64 = await fileToBase64(file);
+      const result = await uploadImageMutation.mutateAsync({ fileName: file.name, contentType: file.type, dataBase64 });
+      onChange(result.url);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to upload image");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {imageUrl && (
+        <div className="relative">
+          <img src={imageUrl} alt="" className="h-32 w-full rounded-md object-cover border border-border" />
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="absolute top-2 right-2"
+            onClick={() => onChange("")}
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
+      <label className="flex items-center justify-center gap-2 border border-dashed border-border rounded-md py-3 text-sm text-muted-foreground cursor-pointer hover:bg-brand-cream-deep transition-colors">
+        {isUploading ? (
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="w-4 h-4" /> {imageUrl ? "Replace image" : "Upload image"}
+          </>
+        )}
+        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+      </label>
+    </div>
+  );
+}
 
 function EmptyState({ label }: { label: string }) {
   return (
@@ -467,10 +537,9 @@ export default function AdminDashboard() {
                       value={campaignForm.description}
                       onChange={(e) => setCampaignForm({ ...campaignForm, description: e.target.value })}
                     />
-                    <Input
-                      placeholder="Image URL"
-                      value={campaignForm.imageUrl}
-                      onChange={(e) => setCampaignForm({ ...campaignForm, imageUrl: e.target.value })}
+                    <ImageUploadField
+                      imageUrl={campaignForm.imageUrl}
+                      onChange={(url) => setCampaignForm({ ...campaignForm, imageUrl: url })}
                     />
                     <Input
                       placeholder="Target Amount"
@@ -595,10 +664,9 @@ export default function AdminDashboard() {
                       value={eventForm.description}
                       onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
                     />
-                    <Input
-                      placeholder="Image URL"
-                      value={eventForm.imageUrl}
-                      onChange={(e) => setEventForm({ ...eventForm, imageUrl: e.target.value })}
+                    <ImageUploadField
+                      imageUrl={eventForm.imageUrl}
+                      onChange={(url) => setEventForm({ ...eventForm, imageUrl: url })}
                     />
                     <Input
                       type="date"

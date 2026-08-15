@@ -10,7 +10,7 @@ import {
   createVolunteer, getVolunteers,
   createCampaign, getCampaigns, updateCampaign, deleteCampaign,
   createEvent, getEvents, updateEvent, deleteEvent,
-  getAdminByEmail,
+  getAdminByEmail, uploadMedia,
 } from "./supabase";
 import { createCheckoutSession } from "./stripe";
 import { verifyPassword } from "./_core/password";
@@ -131,6 +131,21 @@ export const appRouter = router({
   }),
 
   admin: router({
+    uploadImage: adminAuthProcedure
+      .input(z.object({
+        fileName: z.string().min(1),
+        contentType: z.string().regex(/^image\//, "Only image uploads are allowed"),
+        dataBase64: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const approxBytes = (input.dataBase64.length * 3) / 4;
+        if (approxBytes > 8 * 1024 * 1024) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Image must be 8MB or smaller" });
+        }
+        const url = await uploadMedia(input.fileName, input.contentType, input.dataBase64);
+        return { url };
+      }),
+
     getContacts: adminAuthProcedure.query(async () => {
       return await getContacts();
     }),

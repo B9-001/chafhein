@@ -53,48 +53,48 @@
 }
 
 :root {
-  --primary: #201c16;
-  --primary-foreground: #fbf7ee;
-  --sidebar-primary: #201c16;
-  --sidebar-primary-foreground: #fbf7ee;
-  --chart-1: #e2711d;
-  --chart-2: #7c9a3c;
-  --chart-3: #f2b705;
-  --chart-4: #c65d2e;
-  --chart-5: #a3b565;
+  --primary: #7c3aed;
+  --primary-foreground: #fef3c7;
+  --sidebar-primary: #6d28d9;
+  --sidebar-primary-foreground: #fef3c7;
+  --chart-1: #7c3aed;
+  --chart-2: #fbbf24;
+  --chart-3: #a78bfa;
+  --chart-4: #fcd34d;
+  --chart-5: #4c1d95;
   --radius: 0.65rem;
-  --background: #fbf7ee;
-  --foreground: #201c16;
+  --background: #ffffff;
+  --foreground: #3f0f5c;
   --card: #ffffff;
-  --card-foreground: #201c16;
+  --card-foreground: #3f0f5c;
   --popover: #ffffff;
-  --popover-foreground: #201c16;
-  --secondary: #f2b705;
-  --secondary-foreground: #201c16;
-  --muted: #f2ecdc;
-  --muted-foreground: #6b6459;
-  --accent: #e2711d;
-  --accent-foreground: #fbf7ee;
+  --popover-foreground: #3f0f5c;
+  --secondary: #fbbf24;
+  --secondary-foreground: #3f0f5c;
+  --muted: #f5f0ff;
+  --muted-foreground: #6b5b7a;
+  --accent: #7c3aed;
+  --accent-foreground: #fef3c7;
   --destructive: #dc2626;
   --destructive-foreground: #fef3c7;
-  --border: #e9e0cc;
-  --input: #f2ecdc;
-  --ring: #201c16;
-  --sidebar: #fbf7ee;
-  --sidebar-foreground: #201c16;
-  --sidebar-accent: #f2b705;
-  --sidebar-accent-foreground: #201c16;
-  --sidebar-border: #e9e0cc;
-  --sidebar-ring: #201c16;
-  /* CHAFHEIN brand palette (Kalypsia-inspired) */
-  --brand-orange: #e2711d;
-  --brand-orange-dark: #c65d2e;
-  --brand-green: #7c9a3c;
-  --brand-green-dark: #5f7a2c;
-  --brand-gold: #f2b705;
-  --brand-cream: #fbf7ee;
-  --brand-cream-deep: #f2ecdc;
-  --brand-ink: #201c16;
+  --border: #f0e6ff;
+  --input: #ede4ff;
+  --ring: #7c3aed;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #3f0f5c;
+  --sidebar-accent: #fbbf24;
+  --sidebar-accent-foreground: #3f0f5c;
+  --sidebar-border: #f0e6ff;
+  --sidebar-ring: #7c3aed;
+  /* CHAFHEIN brand palette: purple, white, and yellow */
+  --brand-orange: #6d28d9;
+  --brand-orange-dark: #5b21b6;
+  --brand-green: #9333ea;
+  --brand-green-dark: #581c87;
+  --brand-gold: #fbbf24;
+  --brand-cream: #ffffff;
+  --brand-cream-deep: #f3e8ff;
+  --brand-ink: #3f0f5c;
 }
 
 .dark {

@@ -1,12 +1,12 @@
 type PaintSplashProps = {
-  color?: "orange" | "green" | "gold";
+  color?: "purple" | "purpleDark" | "gold";
   className?: string;
 };
 
 const COLORS: Record<NonNullable<PaintSplashProps["color"]>, string> = {
-  orange: "#E2711D",
-  green: "#7C9A3C",
-  gold: "#F2B705",
+  purple: "#7C3AED",
+  purpleDark: "#4C1D95",
+  gold: "#FBBF24",
 };
 
 /**
@@ -15,7 +15,7 @@ const COLORS: Record<NonNullable<PaintSplashProps["color"]>, string> = {
  * Purely decorative — safe to place with `aria-hidden` and absolute
  * positioning; never carries layout-affecting content.
  */
-export function PaintSplash({ color = "orange", className = "h-16 w-20" }: PaintSplashProps) {
+export function PaintSplash({ color = "purple", className = "h-16 w-20" }: PaintSplashProps) {
   return (
     <svg
       viewBox="0 0 120 90"

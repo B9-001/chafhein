@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
@@ -409,6 +410,25 @@ export async function deleteEvent(id: string): Promise<true> {
   const { error } = await requireSupabase().from('events').delete().eq('id', id);
   if (error) throw error;
   return true;
+}
+
+// --- Media uploads ---
+
+const MEDIA_BUCKET = 'media';
+
+export async function uploadMedia(fileName: string, contentType: string, dataBase64: string): Promise<string> {
+  const buffer = Buffer.from(dataBase64, 'base64');
+  const ext = fileName.includes('.') ? fileName.split('.').pop() : 'jpg';
+  const key = `${crypto.randomUUID()}.${ext}`;
+
+  const { error } = await requireSupabase().storage
+    .from(MEDIA_BUCKET)
+    .upload(key, buffer, { contentType, upsert: false });
+
+  if (error) throw error;
+
+  const { data } = requireSupabase().storage.from(MEDIA_BUCKET).getPublicUrl(key);
+  return data.publicUrl;
 }
 
 // --- Admin accounts ---

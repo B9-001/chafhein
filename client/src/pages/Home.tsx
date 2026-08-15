@@ -367,7 +367,7 @@ export default function Home() {
           <div className="relative animate-slide-in-right pb-8 sm:pb-0">
             <PaintSplash color="gold" className="absolute -top-8 -right-6 h-20 w-24 opacity-70 -z-10" />
             <PaintSplash color="purple" className="absolute -bottom-6 -left-6 h-16 w-20 opacity-30 -z-10" />
-            <div className="relative bg-gradient-to-br from-accent to-brand-orange-dark rounded-3xl p-12 text-center overflow-hidden">
+            <div className="relative bg-gradient-to-br from-brand-ink to-brand-orange-dark rounded-3xl p-12 text-center overflow-hidden">
               <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 20%, white 0, transparent 40%)" }} />
               <div className="relative text-6xl mb-4">🤝</div>
               <p className="relative text-accent-foreground font-serif text-xl font-semibold">Empowering Communities Across Nigeria</p>
@@ -491,7 +491,7 @@ export default function Home() {
                     {campaign.imageUrl ? (
                       <img src={campaign.imageUrl} alt="" className="h-44 w-full object-cover" />
                     ) : (
-                      <div className="h-44 w-full bg-gradient-to-br from-accent to-brand-orange-dark flex items-center justify-center">
+                      <div className="h-44 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
                         <Heart className="w-12 h-12 text-accent-foreground/90" />
                       </div>
                     )}
@@ -543,7 +543,7 @@ export default function Home() {
               { title: "Become a Partner", desc: "Partner with us to amplify our impact and reach", icon: Handshake, form: "contact" as const },
             ].map((item, i) => (
               <Card key={i} className="card-hover border-border hover:border-accent animate-scale-in overflow-hidden pt-0" style={{ animationDelay: `${i * 0.1}s` }}>
-                <div className="h-32 w-full bg-gradient-to-br from-accent to-brand-orange-dark flex items-center justify-center">
+                <div className="h-32 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
                   <item.icon className="w-12 h-12 text-accent-foreground" />
                 </div>
                 <CardHeader>
@@ -571,7 +571,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {upcomingEvents.map((event, i) => (
               <Card key={i} className="card-hover border-border hover:border-brand-gold animate-scale-in overflow-hidden pt-0" style={{ animationDelay: `${i * 0.1}s` }}>
-                <div className="relative h-28 w-full bg-gradient-to-br from-accent to-brand-orange-dark flex items-center justify-center">
+                <div className="relative h-28 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
                   <Calendar className="w-10 h-10 text-accent-foreground/90" />
                   <span className="absolute top-3 left-3 bg-white text-accent text-xs font-semibold px-3 py-1 rounded-full shadow">
                     {event.date}
@@ -593,7 +593,7 @@ export default function Home() {
       </section>
 
       {/* CTA Banner */}
-      <section className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-accent to-brand-orange-dark overflow-hidden animate-fade-in-up delay-600">
+      <section className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-brand-ink to-brand-orange-dark overflow-hidden animate-fade-in-up delay-600">
         <PaintSplash color="gold" className="absolute -top-6 left-10 h-20 w-24 opacity-30 -z-0" />
         <PaintSplash color="purpleDark" className="absolute -bottom-8 right-16 h-24 w-28 opacity-30 -z-0" />
         <div className="relative max-w-3xl mx-auto text-center space-y-6">

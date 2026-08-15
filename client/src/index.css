@@ -53,15 +53,15 @@
 }
 
 :root {
-  --primary: #7c3aed;
+  --primary: #91008d;
   --primary-foreground: #fef3c7;
-  --sidebar-primary: #6d28d9;
+  --sidebar-primary: #91008d;
   --sidebar-primary-foreground: #fef3c7;
-  --chart-1: #7c3aed;
+  --chart-1: #91008d;
   --chart-2: #fbbf24;
-  --chart-3: #a78bfa;
+  --chart-3: #b8129b;
   --chart-4: #fcd34d;
-  --chart-5: #4c1d95;
+  --chart-5: #50004e;
   --radius: 0.65rem;
   --background: #ffffff;
   --foreground: #3f0f5c;
@@ -71,29 +71,29 @@
   --popover-foreground: #3f0f5c;
   --secondary: #fbbf24;
   --secondary-foreground: #3f0f5c;
-  --muted: #f5f0ff;
+  --muted: #f8ebf8;
   --muted-foreground: #6b5b7a;
-  --accent: #7c3aed;
+  --accent: #91008d;
   --accent-foreground: #fef3c7;
   --destructive: #dc2626;
   --destructive-foreground: #fef3c7;
-  --border: #f0e6ff;
-  --input: #ede4ff;
-  --ring: #7c3aed;
+  --border: #f5dff4;
+  --input: #f5dff4;
+  --ring: #91008d;
   --sidebar: #ffffff;
   --sidebar-foreground: #3f0f5c;
   --sidebar-accent: #fbbf24;
   --sidebar-accent-foreground: #3f0f5c;
-  --sidebar-border: #f0e6ff;
-  --sidebar-ring: #7c3aed;
+  --sidebar-border: #f5dff4;
+  --sidebar-ring: #91008d;
   /* CHAFHEIN brand palette: purple, white, and yellow */
-  --brand-orange: #6d28d9;
-  --brand-orange-dark: #5b21b6;
-  --brand-green: #9333ea;
-  --brand-green-dark: #581c87;
+  --brand-orange: #6d006a;
+  --brand-orange-dark: #52004f;
+  --brand-green: #b8129b;
+  --brand-green-dark: #52004f;
   --brand-gold: #fbbf24;
   --brand-cream: #ffffff;
-  --brand-cream-deep: #f3e8ff;
+  --brand-cream-deep: #f5dff4;
   --brand-ink: #3f0f5c;
 }
 

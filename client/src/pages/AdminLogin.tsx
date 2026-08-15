@@ -32,8 +32,8 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-yellow-50 flex items-center justify-center px-4">
-      <Card className="w-full max-w-md border-purple-200 shadow-xl shadow-purple-100/50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="min-h-screen bg-gradient-to-br from-brand-cream via-white to-brand-cream-deep flex items-center justify-center px-4">
+      <Card className="w-full max-w-md border-border shadow-xl shadow-brand-ink/5 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <CardHeader className="text-center space-y-3">
           <div className="flex justify-center">
             <Logo className="h-14 w-14" title={false} />
@@ -44,7 +44,7 @@ export default function AdminLogin() {
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label htmlFor="admin-email" className="text-sm font-medium text-gray-700">
+              <label htmlFor="admin-email" className="text-sm font-medium text-foreground/80">
                 Email
               </label>
               <Input
@@ -58,7 +58,7 @@ export default function AdminLogin() {
               />
             </div>
             <div className="space-y-1.5">
-              <label htmlFor="admin-password" className="text-sm font-medium text-gray-700">
+              <label htmlFor="admin-password" className="text-sm font-medium text-foreground/80">
                 Password
               </label>
               <div className="relative">
@@ -75,7 +75,7 @@ export default function AdminLogin() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -85,7 +85,7 @@ export default function AdminLogin() {
 
             <Button
               type="submit"
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 text-base"
+              className="w-full bg-accent hover:bg-brand-orange-dark text-accent-foreground py-3 text-base"
               disabled={isLoggingIn || loading}
             >
               {isLoggingIn ? (
@@ -100,7 +100,7 @@ export default function AdminLogin() {
           <Button
             onClick={() => setLocation("/")}
             variant="outline"
-            className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+            className="w-full border-accent text-accent hover:bg-brand-cream-deep"
           >
             Back to Home
           </Button>

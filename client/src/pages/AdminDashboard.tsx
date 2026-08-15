@@ -37,7 +37,7 @@ const emptyEventForm = {
 
 function EmptyState({ label }: { label: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 py-12 text-gray-400">
+    <div className="flex flex-col items-center justify-center gap-2 py-12 text-muted-foreground">
       <Inbox className="w-8 h-8" />
       <p className="text-sm">{label}</p>
     </div>
@@ -225,15 +225,15 @@ export default function AdminDashboard() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-yellow-50">
-        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-cream to-brand-cream-deep">
+        <Loader2 className="w-8 h-8 animate-spin text-accent" />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-yellow-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-cream to-brand-cream-deep px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
@@ -241,7 +241,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <Link href="/admin-login">
-              <Button className="w-full bg-purple-600 hover:bg-purple-700">Go to Admin Login</Button>
+              <Button className="w-full bg-accent hover:bg-brand-orange-dark">Go to Admin Login</Button>
             </Link>
             <Link href="/">
               <Button variant="outline" className="w-full">Return to Home</Button>
@@ -253,16 +253,16 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50/60 to-yellow-50/40">
+    <div className="min-h-screen bg-gradient-to-br from-brand-cream/60 to-brand-cream-deep/40">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
+      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-brand-cream-deep">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Logo className="h-9 w-9" title={false} />
-            <h1 className="text-xl font-bold text-purple-950">Admin Dashboard</h1>
+            <h1 className="text-xl font-serif font-bold text-foreground">Admin Dashboard</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="hidden sm:block text-sm text-gray-600">{admin?.email}</span>
+            <span className="hidden sm:block text-sm text-muted-foreground">{admin?.email}</span>
             <Button
               variant="outline"
               size="sm"
@@ -270,7 +270,7 @@ export default function AdminDashboard() {
                 await logout();
                 window.location.href = "/admin-login";
               }}
-              className="border-purple-600 text-purple-600 hover:bg-purple-50"
+              className="border-accent text-accent hover:bg-brand-cream-deep"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -282,20 +282,20 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-white border border-purple-200 p-1">
-            <TabsTrigger value="contacts" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-white border border-border p-1">
+            <TabsTrigger value="contacts" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Contacts ({contacts.length})
             </TabsTrigger>
-            <TabsTrigger value="donations" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+            <TabsTrigger value="donations" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Donations ({donations.length})
             </TabsTrigger>
-            <TabsTrigger value="volunteers" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+            <TabsTrigger value="volunteers" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Volunteers ({volunteers.length})
             </TabsTrigger>
-            <TabsTrigger value="campaigns" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+            <TabsTrigger value="campaigns" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Campaigns ({campaigns.length})
             </TabsTrigger>
-            <TabsTrigger value="events" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
+            <TabsTrigger value="events" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Events ({events.length})
             </TabsTrigger>
           </TabsList>
@@ -309,14 +309,14 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {contactsLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
                 ) : contacts.length === 0 ? (
                   <EmptyState label="No contact messages yet" />
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-purple-50">
+                        <TableRow className="bg-brand-cream-deep">
                           <TableHead>Name</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Message</TableHead>
@@ -343,7 +343,7 @@ export default function AdminDashboard() {
           {/* Donations Tab */}
           <TabsContent value="donations" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Button onClick={exportDonationsPDF} disabled={donations.length === 0} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={exportDonationsPDF} disabled={donations.length === 0} className="bg-accent hover:bg-brand-orange-dark">
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
@@ -355,14 +355,14 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {donationsLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
                 ) : donations.length === 0 ? (
                   <EmptyState label="No donations yet" />
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-purple-50">
+                        <TableRow className="bg-brand-cream-deep">
                           <TableHead>Donor Name</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Amount</TableHead>
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
                           <TableRow key={donation.id}>
                             <TableCell className="font-medium">{donation.donorName}</TableCell>
                             <TableCell>{donation.donorEmail}</TableCell>
-                            <TableCell className="font-semibold text-purple-600">{donation.amount}</TableCell>
+                            <TableCell className="font-semibold text-accent">{donation.amount}</TableCell>
                             <TableCell className="max-w-xs truncate">{donation.message || "N/A"}</TableCell>
                             <TableCell>{formatDate(donation.createdAt)}</TableCell>
                           </TableRow>
@@ -391,7 +391,7 @@ export default function AdminDashboard() {
           {/* Volunteers Tab */}
           <TabsContent value="volunteers" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Button onClick={exportVolunteersPDF} disabled={volunteers.length === 0} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={exportVolunteersPDF} disabled={volunteers.length === 0} className="bg-accent hover:bg-brand-orange-dark">
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
@@ -403,14 +403,14 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {volunteersLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
                 ) : volunteers.length === 0 ? (
                   <EmptyState label="No volunteer applications yet" />
                 ) : (
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-purple-50">
+                        <TableRow className="bg-brand-cream-deep">
                           <TableHead>Name</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Skills</TableHead>
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
               <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-accent hover:bg-brand-orange-dark"
                     onClick={() => {
                       setEditingCampaignId(null);
                       setCampaignForm(emptyCampaignForm);
@@ -490,7 +490,7 @@ export default function AdminDashboard() {
                     </Select>
                     <Button
                       onClick={handleCampaignSubmit}
-                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      className="w-full bg-accent hover:bg-brand-orange-dark"
                       disabled={createCampaignMutation.isPending || updateCampaignMutation.isPending}
                     >
                       {editingCampaignId ? "Update" : "Create"} Campaign
@@ -506,26 +506,26 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {campaignsLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
                 ) : campaigns.length === 0 ? (
                   <EmptyState label="No campaigns yet — create one to show it on the homepage" />
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
                     {campaigns.map((campaign) => (
-                      <Card key={campaign.id} className="border border-purple-200">
+                      <Card key={campaign.id} className="border border-border">
                         <CardHeader className="pb-3">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <CardTitle className="text-lg">{campaign.title}</CardTitle>
-                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700">
+                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-brand-cream-deep text-accent">
                                 {campaign.status}
                               </span>
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                          <p className="text-sm text-gray-600 line-clamp-2">{campaign.description}</p>
-                          <p className="text-sm font-semibold text-purple-600">
+                          <p className="text-sm text-muted-foreground line-clamp-2">{campaign.description}</p>
+                          <p className="text-sm font-semibold text-accent">
                             {formatAmount(campaign.raisedAmount)} raised of {formatAmount(campaign.targetAmount)}
                           </p>
                           <div className="flex gap-2 pt-1">
@@ -570,7 +570,7 @@ export default function AdminDashboard() {
               <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    className="bg-purple-600 hover:bg-purple-700"
+                    className="bg-accent hover:bg-brand-orange-dark"
                     onClick={() => {
                       setEditingEventId(null);
                       setEventForm(emptyEventForm);
@@ -622,7 +622,7 @@ export default function AdminDashboard() {
                     </Select>
                     <Button
                       onClick={handleEventSubmit}
-                      className="w-full bg-purple-600 hover:bg-purple-700"
+                      className="w-full bg-accent hover:bg-brand-orange-dark"
                       disabled={createEventMutation.isPending || updateEventMutation.isPending}
                     >
                       {editingEventId ? "Update" : "Create"} Event
@@ -638,27 +638,27 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 {eventsLoading ? (
-                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
                 ) : events.length === 0 ? (
                   <EmptyState label="No events yet — create one to show it on the homepage" />
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
                     {events.map((event) => (
-                      <Card key={event.id} className="border border-yellow-200">
+                      <Card key={event.id} className="border border-border">
                         <CardHeader className="pb-3">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <CardTitle className="text-lg">{event.title}</CardTitle>
-                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-brand-gold/20 text-brand-green-dark">
                                 {event.status}
                               </span>
                             </div>
                           </div>
                         </CardHeader>
                         <CardContent className="space-y-2">
-                          <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
-                          <p className="text-sm font-semibold text-purple-600">{formatDate(event.eventDate)}</p>
-                          <p className="text-sm text-gray-600">{event.location || "N/A"}</p>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
+                          <p className="text-sm font-semibold text-accent">{formatDate(event.eventDate)}</p>
+                          <p className="text-sm text-muted-foreground">{event.location || "N/A"}</p>
                           <div className="flex gap-2 pt-1">
                             <Button
                               size="sm"

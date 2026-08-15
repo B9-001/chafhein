@@ -7,6 +7,7 @@ import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, Arrow
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { PaystackButton } from "react-paystack";
+import { PaintSplash } from "@/components/PaintSplash";
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -214,78 +215,78 @@ export default function Home() {
 
         .card-hover:hover {
           transform: translateY(-8px);
-          box-shadow: 0 20px 40px rgba(147, 51, 234, 0.15);
+          box-shadow: 0 20px 40px rgba(32, 28, 22, 0.14);
         }
       `}</style>
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-purple-100 animate-fade-in-up">
+      <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-brand-cream-deep animate-fade-in-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="CHAFHEIN" className="h-10 w-10 object-contain" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-700 to-yellow-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-serif font-bold bg-gradient-to-r from-brand-orange to-brand-gold bg-clip-text text-transparent">
               CHAFHEIN
             </span>
           </div>
-          
+
           {/* Desktop Navigation */}
           <div className="hidden md:flex gap-8">
-            <a href="#home" className="text-gray-700 hover:text-purple-700 transition duration-300">Home</a>
-            <a href="#about" className="text-gray-700 hover:text-purple-700 transition duration-300">About</a>
-            <a href="#services" className="text-gray-700 hover:text-purple-700 transition duration-300">Services</a>
-            <a href="#events" className="text-gray-700 hover:text-purple-700 transition duration-300">Events</a>
-            <a href="#contact" className="text-gray-700 hover:text-purple-700 transition duration-300">Contact</a>
+            <a href="#home" className="text-foreground hover:text-accent transition duration-300">Home</a>
+            <a href="#about" className="text-foreground hover:text-accent transition duration-300">About</a>
+            <a href="#services" className="text-foreground hover:text-accent transition duration-300">Services</a>
+            <a href="#events" className="text-foreground hover:text-accent transition duration-300">Events</a>
+            <a href="#contact" className="text-foreground hover:text-accent transition duration-300">Contact</a>
           </div>
-          
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 hover:bg-purple-100 rounded-lg transition duration-300"
+            className="md:hidden p-2 hover:bg-brand-cream-deep rounded-lg transition duration-300"
           >
             {mobileMenuOpen ? (
-              <X className="w-6 h-6 text-purple-700" />
+              <X className="w-6 h-6 text-accent" />
             ) : (
-              <Menu className="w-6 h-6 text-purple-700" />
+              <Menu className="w-6 h-6 text-accent" />
             )}
           </button>
         </div>
-        
+
         {/* Mobile Navigation Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t border-purple-100 animate-fade-in-up">
+          <div className="md:hidden bg-white border-t border-brand-cream-deep animate-fade-in-up">
             <div className="px-4 py-4 space-y-3">
               <a
                 href="#home"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+                className="block text-foreground hover:text-accent hover:bg-brand-cream-deep px-4 py-2 rounded-lg transition duration-300"
               >
                 Home
               </a>
               <a
                 href="#about"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+                className="block text-foreground hover:text-accent hover:bg-brand-cream-deep px-4 py-2 rounded-lg transition duration-300"
               >
                 About
               </a>
               <a
                 href="#services"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+                className="block text-foreground hover:text-accent hover:bg-brand-cream-deep px-4 py-2 rounded-lg transition duration-300"
               >
                 Services
               </a>
               <a
                 href="#events"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+                className="block text-foreground hover:text-accent hover:bg-brand-cream-deep px-4 py-2 rounded-lg transition duration-300"
               >
                 Events
               </a>
               <a
                 href="#contact"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block text-gray-700 hover:text-purple-700 hover:bg-purple-50 px-4 py-2 rounded-lg transition duration-300"
+                className="block text-foreground hover:text-accent hover:bg-brand-cream-deep px-4 py-2 rounded-lg transition duration-300"
               >
                 Contact
               </a>
@@ -295,35 +296,36 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section id="home" className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 via-white to-yellow-50 animate-fade-in-up">
+      <section id="home" className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-brand-cream via-white to-brand-cream-deep animate-fade-in-up">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div className="space-y-4 sm:space-y-6 animate-slide-in-left">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-tight">
-              Let's Build The Better World Together
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold text-foreground leading-tight">
+              Let's Build The <span className="brand-mark">Better World</span> Together
             </h1>
-            <p className="text-lg sm:text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-muted-foreground">
               Connected Hands for Family Health and Empowerment Initiative (CHAFHEI) is a youth-led, non-profit organization dedicated to creating sustainable change through healthcare, education, and community empowerment.
             </p>
-            <p className="text-base sm:text-lg text-purple-700 font-semibold">
+            <p className="text-base sm:text-lg text-accent font-semibold">
               Our Mission: To empower communities through accessible healthcare, quality education, and sustainable development initiatives.
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4">
-              <Button onClick={() => setActiveForm("donation")} className="bg-purple-600 hover:bg-purple-700 text-white px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
+              <Button onClick={() => setActiveForm("donation")} className="bg-accent hover:bg-brand-orange-dark text-accent-foreground px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Donate Now
               </Button>
-              <Button onClick={() => setActiveForm("volunteer")} variant="outline" className="border-purple-600 text-purple-600 hover:bg-purple-50 px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
+              <Button onClick={() => setActiveForm("volunteer")} variant="outline" className="border-accent text-accent hover:bg-brand-cream-deep px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Volunteer
               </Button>
-              <Button onClick={() => setActiveForm("contact")} variant="outline" className="border-yellow-600 text-yellow-600 hover:bg-yellow-50 px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
+              <Button onClick={() => setActiveForm("contact")} variant="outline" className="border-brand-green-dark text-brand-green-dark hover:bg-brand-cream-deep px-6 sm:px-8 py-2 sm:py-3 text-base sm:text-lg">
                 Partner With Us
               </Button>
             </div>
           </div>
           <div className="relative animate-slide-in-right">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-200 to-yellow-200 rounded-3xl blur-3xl opacity-30"></div>
-            <div className="relative bg-gradient-to-br from-purple-100 to-yellow-100 rounded-3xl p-12 text-center">
+            <PaintSplash color="gold" className="absolute -top-8 -right-6 h-20 w-24 opacity-70 -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-r from-brand-orange/20 to-brand-gold/20 rounded-3xl blur-3xl opacity-30"></div>
+            <div className="relative bg-gradient-to-br from-brand-cream-deep to-brand-gold/10 rounded-3xl p-12 text-center">
               <div className="text-6xl mb-4">🤝</div>
-              <p className="text-gray-700 font-semibold">300+ People Reached in Nigeria</p>
+              <p className="text-foreground font-semibold">300+ People Reached in Nigeria</p>
             </div>
           </div>
         </div>
@@ -332,7 +334,7 @@ export default function Home() {
       {/* Services Section */}
       <section id="services" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-100">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Our Services</h2>
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-center text-foreground mb-12 sm:mb-16">Our Services</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               { icon: "🏥", title: "SRHR Services", desc: "Sexual and Reproductive Health and Rights education and services" },
@@ -342,13 +344,13 @@ export default function Home() {
               { icon: "🎓", title: "Mentorship", desc: "Capacity building and mentorship programs" },
               { icon: "🌍", title: "Community Health", desc: "Community-led health initiatives and awareness" },
             ].map((service, i) => (
-              <Card key={i} className="card-hover border-purple-200 hover:border-purple-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+              <Card key={i} className="card-hover border-border hover:border-accent animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
                 <CardHeader>
                   <div className="text-4xl mb-2">{service.icon}</div>
-                  <CardTitle className="text-purple-700">{service.title}</CardTitle>
+                  <CardTitle className="text-accent">{service.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">{service.desc}</p>
+                  <p className="text-muted-foreground">{service.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -357,12 +359,13 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 to-yellow-50 animate-fade-in-up delay-200">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-8">About CHAFHEI</h2>
-          <div className="space-y-4 sm:space-y-6 text-base sm:text-lg text-gray-700 leading-relaxed">
+      <section id="about" className="relative py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-brand-cream to-brand-cream-deep animate-fade-in-up delay-200">
+        <div className="max-w-4xl mx-auto relative">
+          <PaintSplash color="green" className="absolute -top-10 right-0 h-16 w-20 opacity-60 -z-10" />
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-center text-foreground mb-8">About CHAFHEI</h2>
+          <div className="space-y-4 sm:space-y-6 text-base sm:text-lg text-foreground/80 leading-relaxed">
             <p>
-              <strong className="text-purple-700">Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
+              <strong className="text-accent">Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
             </p>
             <p>
               We believe that every individual deserves access to quality healthcare, education, and opportunities for personal development. Our work focuses on bridging the gap between healthcare access, education, and community empowerment.
@@ -377,21 +380,21 @@ export default function Home() {
       {/* Get Involved Section */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-300">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Get Involved</h2>
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-center text-foreground mb-12 sm:mb-16">Get Involved</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
-              { title: "Become a Volunteer", desc: "Join our team and make a direct impact in communities", icon: Users, color: "purple" },
-              { title: "Donate to Support", desc: "Your donation helps us reach more people and create lasting change", icon: Heart, color: "red" },
-              { title: "Become a Partner", desc: "Partner with us to amplify our impact and reach", icon: Handshake, color: "yellow" },
+              { title: "Become a Volunteer", desc: "Join our team and make a direct impact in communities", icon: Users, iconClassName: "text-accent", form: "volunteer" as const },
+              { title: "Donate to Support", desc: "Your donation helps us reach more people and create lasting change", icon: Heart, iconClassName: "text-destructive", form: "donation" as const },
+              { title: "Become a Partner", desc: "Partner with us to amplify our impact and reach", icon: Handshake, iconClassName: "text-brand-green-dark", form: "contact" as const },
             ].map((item, i) => (
-              <Card key={i} className="card-hover border-purple-200 hover:border-purple-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+              <Card key={i} className="card-hover border-border hover:border-accent animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
                 <CardHeader>
-                  <item.icon className={`w-12 h-12 mb-4 text-${item.color}-600`} />
-                  <CardTitle className="text-purple-700">{item.title}</CardTitle>
+                  <item.icon className={`w-12 h-12 mb-4 ${item.iconClassName}`} />
+                  <CardTitle className="text-accent">{item.title}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-gray-600">{item.desc}</p>
-                  <Button onClick={() => setActiveForm(item.title.includes("Volunteer") ? "volunteer" : item.title.includes("Donate") ? "donation" : "contact")} className="w-full bg-purple-600 hover:bg-purple-700">
+                  <p className="text-muted-foreground">{item.desc}</p>
+                  <Button onClick={() => setActiveForm(item.form)} className="w-full bg-accent hover:bg-brand-orange-dark">
                     Learn More <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </CardContent>
@@ -402,9 +405,9 @@ export default function Home() {
       </section>
 
       {/* Events Section */}
-      <section id="events" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-yellow-50 to-purple-50 animate-fade-in-up delay-400">
+      <section id="events" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-brand-cream-deep to-brand-cream animate-fade-in-up delay-400">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center text-gray-900 mb-12 sm:mb-16">Upcoming Events</h2>
+          <h2 className="text-3xl sm:text-4xl font-serif font-bold text-center text-foreground mb-12 sm:mb-16">Upcoming Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             {[
               { date: "August 15, 2026", title: "Health Awareness Campaign", location: "Asokoro, Abuja", desc: "Community health screening and awareness program" },
@@ -412,19 +415,19 @@ export default function Home() {
               { date: "September 5, 2026", title: "Volunteer Training Workshop", location: "Asokoro, Abuja", desc: "Capacity building for new volunteers" },
               { date: "September 12, 2026", title: "Community Outreach Program", location: "Asokoro, Abuja", desc: "Direct engagement with community members" },
             ].map((event, i) => (
-              <Card key={i} className="card-hover border-yellow-200 hover:border-yellow-400 animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
+              <Card key={i} className="card-hover border-border hover:border-brand-gold animate-scale-in" style={{ animationDelay: `${i * 0.1}s` }}>
                 <CardHeader>
                   <div className="flex items-center gap-2 mb-2">
-                    <Calendar className="w-5 h-5 text-purple-600" />
-                    <span className="text-sm font-semibold text-purple-600">{event.date}</span>
+                    <Calendar className="w-5 h-5 text-accent" />
+                    <span className="text-sm font-semibold text-accent">{event.date}</span>
                   </div>
-                  <CardTitle className="text-purple-700">{event.title}</CardTitle>
+                  <CardTitle>{event.title}</CardTitle>
                   <CardDescription className="flex items-center gap-1">
                     <MapPin className="w-4 h-4" /> {event.location}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">{event.desc}</p>
+                  <p className="text-muted-foreground">{event.desc}</p>
                 </CardContent>
               </Card>
             ))}
@@ -436,34 +439,34 @@ export default function Home() {
       <section id="contact" className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white animate-fade-in-up delay-500">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           <div className="space-y-6 sm:space-y-8 animate-slide-in-left">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">Get In Touch</h2>
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">Get In Touch</h2>
             <div className="space-y-4 sm:space-y-6">
               <div className="flex gap-4">
-                <MapPin className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <MapPin className="w-6 h-6 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-900">Address</h3>
-                  <p className="text-gray-600">Asokoro, Abuja, Nigeria</p>
+                  <h3 className="font-semibold text-foreground">Address</h3>
+                  <p className="text-muted-foreground">Asokoro, Abuja, Nigeria</p>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Mail className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <Mail className="w-6 h-6 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-900">Email</h3>
-                  <a href="mailto:info@chafhein.ng" className="text-purple-600 hover:text-purple-700">info@chafhein.ng</a>
+                  <h3 className="font-semibold text-foreground">Email</h3>
+                  <a href="mailto:info@chafhein.ng" className="text-accent hover:text-brand-orange-dark">info@chafhein.ng</a>
                 </div>
               </div>
               <div className="flex gap-4">
-                <Phone className="w-6 h-6 text-purple-600 flex-shrink-0" />
+                <Phone className="w-6 h-6 text-accent flex-shrink-0" />
                 <div>
-                  <h3 className="font-semibold text-gray-900">Phone</h3>
-                  <a href="tel:+2348166265367" className="text-purple-600 hover:text-purple-700">+234 816 626 5367</a>
+                  <h3 className="font-semibold text-foreground">Phone</h3>
+                  <a href="tel:+2348166265367" className="text-accent hover:text-brand-orange-dark">+234 816 626 5367</a>
                 </div>
               </div>
               <div className="flex gap-4 pt-4">
-                <a href="https://instagram.com" className="text-purple-600 hover:text-purple-700">
+                <a href="https://instagram.com" className="text-accent hover:text-brand-orange-dark">
                   <Instagram className="w-6 h-6" />
                 </a>
-                <a href="https://twitter.com" className="text-purple-600 hover:text-purple-700">
+                <a href="https://twitter.com" className="text-accent hover:text-brand-orange-dark">
                   <Twitter className="w-6 h-6" />
                 </a>
               </div>
@@ -473,7 +476,7 @@ export default function Home() {
           {/* Contact Form */}
           <div className="animate-slide-in-right">
             {activeForm === "contact" && (
-              <Card className="border-purple-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle className="text-2xl sm:text-3xl">Send us a Message</CardTitle>
                 </CardHeader>
@@ -484,7 +487,7 @@ export default function Home() {
                       placeholder="Your Name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <input
@@ -492,17 +495,17 @@ export default function Home() {
                       placeholder="Your Email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <textarea
                       placeholder="Your Message"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-32"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent h-32"
                       required
                     />
-                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitContact.isPending}>
+                    <Button type="submit" className="w-full bg-accent hover:bg-brand-orange-dark" disabled={submitContact.isPending}>
                       {submitContact.isPending ? "Sending..." : "Send Message"}
                     </Button>
                   </form>
@@ -511,7 +514,7 @@ export default function Home() {
             )}
 
             {activeForm === "donation" && (
-              <Card className="border-purple-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle>Make a Donation</CardTitle>
                 </CardHeader>
@@ -522,7 +525,7 @@ export default function Home() {
                       placeholder="Your Name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <input
@@ -530,7 +533,7 @@ export default function Home() {
                       placeholder="Your Email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <input
@@ -538,18 +541,18 @@ export default function Home() {
                       placeholder="Donation Amount (NGN)"
                       value={formData.amount}
                       onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <textarea
                       placeholder="Message (optional)"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-20"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent h-20"
                     />
                     <PaystackButton
                       text="Donate Now"
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-300"
+                      className="w-full bg-accent hover:bg-brand-orange-dark text-accent-foreground px-4 py-2 rounded-lg font-semibold transition duration-300"
                       {...paystackConfig}
                       onSuccess={handlePaystackSuccess}
                       onClose={handlePaystackClose}
@@ -560,7 +563,7 @@ export default function Home() {
             )}
 
             {activeForm === "volunteer" && (
-              <Card className="border-purple-200">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle>Become a Volunteer</CardTitle>
                 </CardHeader>
@@ -571,7 +574,7 @@ export default function Home() {
                       placeholder="Your Name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <input
@@ -579,7 +582,7 @@ export default function Home() {
                       placeholder="Your Email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                       required
                     />
                     <input
@@ -587,15 +590,15 @@ export default function Home() {
                       placeholder="Your Skills"
                       value={formData.skills}
                       onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
                     />
                     <textarea
                       placeholder="Why do you want to volunteer?"
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-2 border border-purple-200 rounded-lg focus:outline-none focus:border-purple-600 h-20"
+                      className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent h-20"
                     />
-                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700" disabled={submitVolunteer.isPending}>
+                    <Button type="submit" className="w-full bg-accent hover:bg-brand-orange-dark" disabled={submitVolunteer.isPending}>
                       {submitVolunteer.isPending ? "Submitting..." : "Apply Now"}
                     </Button>
                   </form>
@@ -605,7 +608,7 @@ export default function Home() {
 
             {!activeForm && (
               <div className="text-center space-y-4">
-                <p className="text-gray-600 text-lg">Select a form to get started</p>
+                <p className="text-muted-foreground text-lg">Select a form to get started</p>
               </div>
             )}
           </div>
@@ -613,9 +616,9 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-brand-ink text-brand-cream py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-400">&copy; 2026 Connected Hands for Family Health and Empowerment Initiative (CHAFHEI). All rights reserved.</p>
+          <p className="text-brand-cream/60">&copy; 2026 Connected Hands for Family Health and Empowerment Initiative (CHAFHEI). All rights reserved.</p>
         </div>
       </footer>
     </div>

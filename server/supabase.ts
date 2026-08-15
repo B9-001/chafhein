@@ -1,226 +1,426 @@
 import { createClient } from '@supabase/supabase-js';
-import { ENV } from './_core/env';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.warn('Supabase credentials not configured. Using local database fallback.');
+  console.warn('Supabase credentials not configured. Server-side data access will fail.');
 }
 
 export const supabase = supabaseUrl && supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
+  ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
   : null;
 
-// Helper functions for database operations
-export async function createContact(data: {
+function requireSupabase() {
+  if (!supabase) throw new Error('Supabase not configured');
+  return supabase;
+}
+
+// The Postgres schema uses snake_case columns; the app (and its tRPC contracts)
+// use camelCase. These row types + mappers keep that translation in one place
+// instead of scattered across callers, since PostgREST rejects unknown column
+// names outright rather than ignoring them.
+
+type ContactRow = {
+  id: string;
   name: string;
   email: string;
   message: string;
-}) {
-  if (!supabase) throw new Error('Supabase not configured');
+  created_at: string;
+};
 
-  const { data: result, error } = await supabase
+export type Contact = {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
+};
+
+const mapContact = (row: ContactRow): Contact => ({
+  id: row.id,
+  name: row.name,
+  email: row.email,
+  message: row.message,
+  createdAt: row.created_at,
+});
+
+type DonationRow = {
+  id: string;
+  amount: string;
+  donor_name: string;
+  donor_email: string;
+  message: string | null;
+  payment_reference: string | null;
+  status: string;
+  created_at: string;
+};
+
+export type Donation = {
+  id: string;
+  amount: string;
+  donorName: string;
+  donorEmail: string;
+  message: string | null;
+  paymentReference: string | null;
+  status: string;
+  createdAt: string;
+};
+
+const mapDonation = (row: DonationRow): Donation => ({
+  id: row.id,
+  amount: row.amount,
+  donorName: row.donor_name,
+  donorEmail: row.donor_email,
+  message: row.message,
+  paymentReference: row.payment_reference,
+  status: row.status,
+  createdAt: row.created_at,
+});
+
+type VolunteerRow = {
+  id: string;
+  name: string;
+  email: string;
+  skills: string | null;
+  message: string | null;
+  created_at: string;
+};
+
+export type Volunteer = {
+  id: string;
+  name: string;
+  email: string;
+  skills: string | null;
+  message: string | null;
+  createdAt: string;
+};
+
+const mapVolunteer = (row: VolunteerRow): Volunteer => ({
+  id: row.id,
+  name: row.name,
+  email: row.email,
+  skills: row.skills,
+  message: row.message,
+  createdAt: row.created_at,
+});
+
+type CampaignRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  target_amount: string | number | null;
+  raised_amount: string | number | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Campaign = {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  targetAmount: string | number | null;
+  raisedAmount: string | number | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const mapCampaign = (row: CampaignRow): Campaign => ({
+  id: row.id,
+  title: row.title,
+  description: row.description,
+  imageUrl: row.image_url,
+  targetAmount: row.target_amount,
+  raisedAmount: row.raised_amount,
+  status: row.status,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
+
+type EventRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  image_url: string | null;
+  event_date: string | null;
+  location: string | null;
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type EventItem = {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string | null;
+  eventDate: string | null;
+  location: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+const mapEvent = (row: EventRow): EventItem => ({
+  id: row.id,
+  title: row.title,
+  description: row.description,
+  imageUrl: row.image_url,
+  eventDate: row.event_date,
+  location: row.location,
+  status: row.status,
+  createdAt: row.created_at,
+  updatedAt: row.updated_at,
+});
+
+export type Admin = { id: string; email: string; passwordHash: string };
+
+// --- Contacts ---
+
+export async function createContact(data: { name: string; email: string; message: string }): Promise<Contact> {
+  const { data: result, error } = await requireSupabase()
     .from('contacts')
     .insert([data])
-    .select();
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapContact(result);
 }
+
+export async function getContacts(): Promise<Contact[]> {
+  const { data, error } = await requireSupabase()
+    .from('contacts')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapContact);
+}
+
+// --- Donations ---
 
 export async function createDonation(data: {
   donorName: string;
   donorEmail: string;
   amount: string;
   message?: string;
-}) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data: result, error } = await supabase
+  paymentReference?: string;
+}): Promise<Donation> {
+  const { data: result, error } = await requireSupabase()
     .from('donations')
-    .insert([data])
-    .select();
+    .insert([{
+      donor_name: data.donorName,
+      donor_email: data.donorEmail,
+      amount: data.amount,
+      message: data.message || null,
+      payment_reference: data.paymentReference || null,
+      status: 'completed',
+    }])
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapDonation(result);
 }
+
+export async function getDonations(): Promise<Donation[]> {
+  const { data, error } = await requireSupabase()
+    .from('donations')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapDonation);
+}
+
+// --- Volunteers ---
 
 export async function createVolunteer(data: {
   name: string;
   email: string;
   skills: string;
   message?: string;
-}) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data: result, error } = await supabase
+}): Promise<Volunteer> {
+  const { data: result, error } = await requireSupabase()
     .from('volunteers')
-    .insert([data])
-    .select();
+    .insert([{
+      name: data.name,
+      email: data.email,
+      skills: data.skills || null,
+      message: data.message || null,
+    }])
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapVolunteer(result);
 }
 
-export async function getContacts() {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data, error } = await supabase
-    .from('contacts')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data;
-}
-
-export async function getDonations() {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data, error } = await supabase
-    .from('donations')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data;
-}
-
-export async function getVolunteers() {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data, error } = await supabase
+export async function getVolunteers(): Promise<Volunteer[]> {
+  const { data, error } = await requireSupabase()
     .from('volunteers')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  return (data ?? []).map(mapVolunteer);
 }
 
-export async function getCampaigns() {
-  if (!supabase) throw new Error('Supabase not configured');
+// --- Campaigns ---
 
-  const { data, error } = await supabase
+export async function getCampaigns(): Promise<Campaign[]> {
+  const { data, error } = await requireSupabase()
     .from('campaigns')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) throw error;
-  return data;
+  return (data ?? []).map(mapCampaign);
 }
 
 export async function createCampaign(data: {
   title: string;
-  description: string;
+  description?: string;
   image?: string;
   targetAmount?: number;
-  currentAmount?: number;
   status?: string;
-}) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data: result, error } = await supabase
+}): Promise<Campaign> {
+  const { data: result, error } = await requireSupabase()
     .from('campaigns')
-    .insert([data])
-    .select();
+    .insert([{
+      title: data.title,
+      description: data.description || null,
+      image_url: data.image || null,
+      target_amount: data.targetAmount ?? 0,
+      status: data.status || 'active',
+    }])
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapCampaign(result);
 }
 
-export async function updateCampaign(id: number, data: Partial<{
+export async function updateCampaign(id: string, data: Partial<{
   title: string;
   description: string;
-  image?: string;
-  targetAmount?: number;
-  currentAmount?: number;
-  status?: string;
-}>) {
-  if (!supabase) throw new Error('Supabase not configured');
+  image: string;
+  targetAmount: number;
+  currentAmount: number;
+  status: string;
+}>): Promise<Campaign> {
+  const patch: Record<string, unknown> = {};
+  if (data.title !== undefined) patch.title = data.title;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.image !== undefined) patch.image_url = data.image;
+  if (data.targetAmount !== undefined) patch.target_amount = data.targetAmount;
+  if (data.currentAmount !== undefined) patch.raised_amount = data.currentAmount;
+  if (data.status !== undefined) patch.status = data.status;
+  patch.updated_at = new Date().toISOString();
 
-  const { data: result, error } = await supabase
+  const { data: result, error } = await requireSupabase()
     .from('campaigns')
-    .update(data)
+    .update(patch)
     .eq('id', id)
-    .select();
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapCampaign(result);
 }
 
-export async function deleteCampaign(id: number) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { error } = await supabase
-    .from('campaigns')
-    .delete()
-    .eq('id', id);
-
+export async function deleteCampaign(id: string): Promise<true> {
+  const { error } = await requireSupabase().from('campaigns').delete().eq('id', id);
   if (error) throw error;
   return true;
 }
 
-export async function getEvents() {
-  if (!supabase) throw new Error('Supabase not configured');
+// --- Events ---
 
-  const { data, error } = await supabase
+export async function getEvents(): Promise<EventItem[]> {
+  const { data, error } = await requireSupabase()
     .from('events')
     .select('*')
     .order('event_date', { ascending: true });
 
   if (error) throw error;
-  return data;
+  return (data ?? []).map(mapEvent);
 }
 
 export async function createEvent(data: {
   title: string;
-  description: string;
+  description?: string;
   image?: string;
   eventDate?: string;
   location?: string;
   status?: string;
-}) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { data: result, error } = await supabase
+}): Promise<EventItem> {
+  const { data: result, error } = await requireSupabase()
     .from('events')
-    .insert([data])
-    .select();
+    .insert([{
+      title: data.title,
+      description: data.description || null,
+      image_url: data.image || null,
+      event_date: data.eventDate || null,
+      location: data.location || null,
+      status: data.status || 'upcoming',
+    }])
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapEvent(result);
 }
 
-export async function updateEvent(id: number, data: Partial<{
+export async function updateEvent(id: string, data: Partial<{
   title: string;
   description: string;
-  image?: string;
-  eventDate?: string;
-  location?: string;
-  status?: string;
-}>) {
-  if (!supabase) throw new Error('Supabase not configured');
+  image: string;
+  eventDate: string;
+  location: string;
+  status: string;
+}>): Promise<EventItem> {
+  const patch: Record<string, unknown> = {};
+  if (data.title !== undefined) patch.title = data.title;
+  if (data.description !== undefined) patch.description = data.description;
+  if (data.image !== undefined) patch.image_url = data.image;
+  if (data.eventDate !== undefined) patch.event_date = data.eventDate;
+  if (data.location !== undefined) patch.location = data.location;
+  if (data.status !== undefined) patch.status = data.status;
+  patch.updated_at = new Date().toISOString();
 
-  const { data: result, error } = await supabase
+  const { data: result, error } = await requireSupabase()
     .from('events')
-    .update(data)
+    .update(patch)
     .eq('id', id)
-    .select();
+    .select()
+    .single();
 
   if (error) throw error;
-  return result;
+  return mapEvent(result);
 }
 
-export async function deleteEvent(id: number) {
-  if (!supabase) throw new Error('Supabase not configured');
-
-  const { error } = await supabase
-    .from('events')
-    .delete()
-    .eq('id', id);
-
+export async function deleteEvent(id: string): Promise<true> {
+  const { error } = await requireSupabase().from('events').delete().eq('id', id);
   if (error) throw error;
   return true;
+}
+
+// --- Admin accounts ---
+
+export async function getAdminByEmail(email: string): Promise<Admin | null> {
+  const { data, error } = await requireSupabase()
+    .from('admins')
+    .select('id, email, password_hash')
+    .eq('email', email.toLowerCase().trim())
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  return { id: data.id, email: data.email, passwordHash: data.password_hash };
 }

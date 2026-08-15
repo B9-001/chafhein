@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,49 +8,80 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Edit2, Trash2, Download, LogOut } from "lucide-react";
+import { Plus, Edit2, Trash2, Download, LogOut, Loader2, Inbox } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
+import { Logo } from "@/components/Logo";
 import jsPDF from "jspdf";
 
+type CampaignStatus = "active" | "completed" | "paused";
+type EventStatus = "upcoming" | "ongoing" | "completed";
+
+const emptyCampaignForm = {
+  title: "",
+  description: "",
+  imageUrl: "",
+  targetAmount: "",
+  status: "active" as CampaignStatus,
+};
+
+const emptyEventForm = {
+  title: "",
+  description: "",
+  imageUrl: "",
+  date: "",
+  location: "",
+  status: "upcoming" as EventStatus,
+};
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-12 text-gray-400">
+      <Inbox className="w-8 h-8" />
+      <p className="text-sm">{label}</p>
+    </div>
+  );
+}
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+}
+
+function formatAmount(value: string | number | null | undefined) {
+  if (value === null || value === undefined || value === "") return "₦0";
+  const num = Number(value);
+  return Number.isNaN(num) ? String(value) : `₦${num.toLocaleString()}`;
+}
+
 export default function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { admin, logout, loading: authLoading, isAuthenticated } = useAdminAuth();
   const [activeTab, setActiveTab] = useState("contacts");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [editingCampaignId, setEditingCampaignId] = useState<string | null>(null);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
 
-  // Form states
-  const [campaignForm, setCampaignForm] = useState({
-    title: "",
-    description: "",
-    imageUrl: "",
-    targetAmount: "",
-    status: "active" as const,
-  });
+  const [campaignForm, setCampaignForm] = useState(emptyCampaignForm);
+  const [eventForm, setEventForm] = useState(emptyEventForm);
 
-  const [eventForm, setEventForm] = useState({
-    title: "",
-    description: "",
-    imageUrl: "",
-    date: "",
-    location: "",
-    status: "upcoming" as const,
-  });
+  const utils = trpc.useUtils();
 
-  // Queries
-  const { data: contacts = [] } = trpc.admin.getContacts.useQuery();
-  const { data: donations = [] } = trpc.admin.getDonations.useQuery();
-  const { data: volunteers = [] } = trpc.admin.getVolunteers.useQuery();
-  const { data: campaigns = [] } = trpc.admin.getCampaigns.useQuery();
-  const { data: events = [] } = trpc.admin.getEvents.useQuery();
+  const { data: contacts = [], isLoading: contactsLoading } = trpc.admin.getContacts.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: donations = [], isLoading: donationsLoading } = trpc.admin.getDonations.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: volunteers = [], isLoading: volunteersLoading } = trpc.admin.getVolunteers.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: campaigns = [], isLoading: campaignsLoading } = trpc.admin.getCampaigns.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: events = [], isLoading: eventsLoading } = trpc.admin.getEvents.useQuery(undefined, { enabled: isAuthenticated });
 
-  // Mutations
   const createCampaignMutation = trpc.admin.createCampaign.useMutation({
     onSuccess: () => {
       toast.success("Campaign created successfully!");
-      setCampaignForm({ title: "", description: "", imageUrl: "", targetAmount: "", status: "active" });
-      setIsDialogOpen(false);
+      setCampaignForm(emptyCampaignForm);
+      setIsCampaignDialogOpen(false);
+      utils.admin.getCampaigns.invalidate();
+      utils.content.getCampaigns.invalidate();
     },
     onError: (error) => toast.error(error.message),
   });
@@ -58,8 +89,10 @@ export default function AdminDashboard() {
   const updateCampaignMutation = trpc.admin.updateCampaign.useMutation({
     onSuccess: () => {
       toast.success("Campaign updated successfully!");
-      setEditingId(null);
-      setIsDialogOpen(false);
+      setEditingCampaignId(null);
+      setIsCampaignDialogOpen(false);
+      utils.admin.getCampaigns.invalidate();
+      utils.content.getCampaigns.invalidate();
     },
     onError: (error) => toast.error(error.message || "Error updating campaign"),
   });
@@ -67,6 +100,8 @@ export default function AdminDashboard() {
   const deleteCampaignMutation = trpc.admin.deleteCampaign.useMutation({
     onSuccess: () => {
       toast.success("Campaign deleted successfully!");
+      utils.admin.getCampaigns.invalidate();
+      utils.content.getCampaigns.invalidate();
     },
     onError: (error) => toast.error(error.message || "Error deleting campaign"),
   });
@@ -74,8 +109,10 @@ export default function AdminDashboard() {
   const createEventMutation = trpc.admin.createEvent.useMutation({
     onSuccess: () => {
       toast.success("Event created successfully!");
-      setEventForm({ title: "", description: "", imageUrl: "", date: "", location: "", status: "upcoming" });
-      setIsDialogOpen(false);
+      setEventForm(emptyEventForm);
+      setIsEventDialogOpen(false);
+      utils.admin.getEvents.invalidate();
+      utils.content.getEvents.invalidate();
     },
     onError: (error) => toast.error(error.message || "Error creating event"),
   });
@@ -83,8 +120,10 @@ export default function AdminDashboard() {
   const updateEventMutation = trpc.admin.updateEvent.useMutation({
     onSuccess: () => {
       toast.success("Event updated successfully!");
-      setEditingId(null);
-      setIsDialogOpen(false);
+      setEditingEventId(null);
+      setIsEventDialogOpen(false);
+      utils.admin.getEvents.invalidate();
+      utils.content.getEvents.invalidate();
     },
     onError: (error) => toast.error(error.message || "Error updating event"),
   });
@@ -92,11 +131,12 @@ export default function AdminDashboard() {
   const deleteEventMutation = trpc.admin.deleteEvent.useMutation({
     onSuccess: () => {
       toast.success("Event deleted successfully!");
+      utils.admin.getEvents.invalidate();
+      utils.content.getEvents.invalidate();
     },
     onError: (error) => toast.error(error.message || "Error deleting event"),
   });
 
-  // PDF Export Functions
   const exportDonationsPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
@@ -120,8 +160,8 @@ export default function AdminDashboard() {
       }
       doc.text(donation.donorName, 14, y);
       doc.text(donation.donorEmail, 60, y);
-      doc.text(donation.amount, 110, y);
-      doc.text(new Date(donation.createdAt).toLocaleDateString(), 160, y);
+      doc.text(String(donation.amount), 110, y);
+      doc.text(formatDate(donation.createdAt), 160, y);
     });
 
     doc.save("donations-report.pdf");
@@ -152,43 +192,59 @@ export default function AdminDashboard() {
       doc.text(volunteer.name, 14, y);
       doc.text(volunteer.email, 60, y);
       doc.text(volunteer.skills || "N/A", 110, y);
-      doc.text(new Date(volunteer.createdAt).toLocaleDateString(), 160, y);
+      doc.text(formatDate(volunteer.createdAt), 160, y);
     });
 
     doc.save("volunteers-report.pdf");
     toast.success("Volunteers report downloaded!");
   };
 
-  // Handle campaign form submission
   const handleCampaignSubmit = () => {
-    if (editingId) {
-      updateCampaignMutation.mutate({ id: editingId, ...campaignForm });
+    if (!campaignForm.title.trim()) {
+      toast.error("Campaign title is required");
+      return;
+    }
+    if (editingCampaignId) {
+      updateCampaignMutation.mutate({ id: editingCampaignId, ...campaignForm });
     } else {
       createCampaignMutation.mutate(campaignForm);
     }
   };
 
-  // Handle event form submission
   const handleEventSubmit = () => {
-    if (editingId) {
-      updateEventMutation.mutate({ id: editingId, ...eventForm });
+    if (!eventForm.title.trim() || !eventForm.date) {
+      toast.error("Event title and date are required");
+      return;
+    }
+    if (editingEventId) {
+      updateEventMutation.mutate({ id: editingEventId, ...eventForm });
     } else {
       createEventMutation.mutate(eventForm);
     }
   };
 
-  // Check if user is admin
-  if (!user || user.role !== "admin") {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-yellow-50">
+        <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-yellow-50 px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Access Denied</CardTitle>
-            <CardDescription>You do not have permission to access this page.</CardDescription>
+            <CardDescription>You need to sign in to access this page.</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex flex-col gap-3">
+            <Link href="/admin-login">
+              <Button className="w-full bg-purple-600 hover:bg-purple-700">Go to Admin Login</Button>
+            </Link>
             <Link href="/">
-              <Button className="w-full bg-purple-600 hover:bg-purple-700">Return to Home</Button>
+              <Button variant="outline" className="w-full">Return to Home</Button>
             </Link>
           </CardContent>
         </Card>
@@ -197,19 +253,22 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50/60 to-yellow-50/40">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white shadow-sm border-b border-purple-100">
+      <div className="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-purple-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-purple-700">Admin Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <Logo className="h-9 w-9" title={false} />
+            <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+          </div>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user.name}</span>
+            <span className="hidden sm:block text-sm text-gray-600">{admin?.email}</span>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                logout();
-                window.location.href = "/";
+              onClick={async () => {
+                await logout();
+                window.location.href = "/admin-login";
               }}
               className="border-purple-600 text-purple-600 hover:bg-purple-50"
             >
@@ -223,7 +282,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-white border border-purple-200">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-white border border-purple-200 p-1">
             <TabsTrigger value="contacts" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
               Contacts ({contacts.length})
             </TabsTrigger>
@@ -242,43 +301,49 @@ export default function AdminDashboard() {
           </TabsList>
 
           {/* Contacts Tab */}
-          <TabsContent value="contacts" className="space-y-4">
+          <TabsContent value="contacts" className="space-y-4 mt-6">
             <Card>
               <CardHeader>
                 <CardTitle>Contact Messages</CardTitle>
                 <CardDescription>All messages received from the contact form</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-purple-50">
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {contacts.map((contact) => (
-                        <TableRow key={contact.id}>
-                          <TableCell className="font-medium">{contact.name}</TableCell>
-                          <TableCell>{contact.email}</TableCell>
-                          <TableCell className="max-w-xs truncate">{contact.message}</TableCell>
-                          <TableCell>{new Date(contact.createdAt).toLocaleDateString()}</TableCell>
+                {contactsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                ) : contacts.length === 0 ? (
+                  <EmptyState label="No contact messages yet" />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-purple-50">
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Message</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {contacts.map((contact) => (
+                          <TableRow key={contact.id}>
+                            <TableCell className="font-medium">{contact.name}</TableCell>
+                            <TableCell>{contact.email}</TableCell>
+                            <TableCell className="max-w-xs truncate">{contact.message}</TableCell>
+                            <TableCell>{formatDate(contact.createdAt)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Donations Tab */}
-          <TabsContent value="donations" className="space-y-4">
+          <TabsContent value="donations" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Button onClick={exportDonationsPDF} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={exportDonationsPDF} disabled={donations.length === 0} className="bg-purple-600 hover:bg-purple-700">
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
@@ -289,38 +354,44 @@ export default function AdminDashboard() {
                 <CardDescription>All donation records</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-purple-50">
-                        <TableHead>Donor Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {donations.map((donation) => (
-                        <TableRow key={donation.id}>
-                          <TableCell className="font-medium">{donation.donorName}</TableCell>
-                          <TableCell>{donation.donorEmail}</TableCell>
-                          <TableCell className="font-semibold text-purple-600">{donation.amount}</TableCell>
-                          <TableCell className="max-w-xs truncate">{donation.message || "N/A"}</TableCell>
-                          <TableCell>{new Date(donation.createdAt).toLocaleDateString()}</TableCell>
+                {donationsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                ) : donations.length === 0 ? (
+                  <EmptyState label="No donations yet" />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-purple-50">
+                          <TableHead>Donor Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Message</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {donations.map((donation) => (
+                          <TableRow key={donation.id}>
+                            <TableCell className="font-medium">{donation.donorName}</TableCell>
+                            <TableCell>{donation.donorEmail}</TableCell>
+                            <TableCell className="font-semibold text-purple-600">{donation.amount}</TableCell>
+                            <TableCell className="max-w-xs truncate">{donation.message || "N/A"}</TableCell>
+                            <TableCell>{formatDate(donation.createdAt)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Volunteers Tab */}
-          <TabsContent value="volunteers" className="space-y-4">
+          <TabsContent value="volunteers" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Button onClick={exportVolunteersPDF} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={exportVolunteersPDF} disabled={volunteers.length === 0} className="bg-purple-600 hover:bg-purple-700">
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
@@ -331,44 +402,50 @@ export default function AdminDashboard() {
                 <CardDescription>All volunteer applications</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="bg-purple-50">
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Skills</TableHead>
-                        <TableHead>Message</TableHead>
-                        <TableHead>Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {volunteers.map((volunteer) => (
-                        <TableRow key={volunteer.id}>
-                          <TableCell className="font-medium">{volunteer.name}</TableCell>
-                          <TableCell>{volunteer.email}</TableCell>
-                          <TableCell>{volunteer.skills || "N/A"}</TableCell>
-                          <TableCell className="max-w-xs truncate">{volunteer.message || "N/A"}</TableCell>
-                          <TableCell>{new Date(volunteer.createdAt).toLocaleDateString()}</TableCell>
+                {volunteersLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                ) : volunteers.length === 0 ? (
+                  <EmptyState label="No volunteer applications yet" />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-purple-50">
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Skills</TableHead>
+                          <TableHead>Message</TableHead>
+                          <TableHead>Date</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                      </TableHeader>
+                      <TableBody>
+                        {volunteers.map((volunteer) => (
+                          <TableRow key={volunteer.id}>
+                            <TableCell className="font-medium">{volunteer.name}</TableCell>
+                            <TableCell>{volunteer.email}</TableCell>
+                            <TableCell>{volunteer.skills || "N/A"}</TableCell>
+                            <TableCell className="max-w-xs truncate">{volunteer.message || "N/A"}</TableCell>
+                            <TableCell>{formatDate(volunteer.createdAt)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Campaigns Tab */}
-          <TabsContent value="campaigns" className="space-y-4">
+          <TabsContent value="campaigns" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog open={isCampaignDialogOpen} onOpenChange={setIsCampaignDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
                     className="bg-purple-600 hover:bg-purple-700"
                     onClick={() => {
-                      setEditingId(null);
-                      setCampaignForm({ title: "", description: "", imageUrl: "", targetAmount: "", status: "active" });
+                      setEditingCampaignId(null);
+                      setCampaignForm(emptyCampaignForm);
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -377,7 +454,7 @@ export default function AdminDashboard() {
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>{editingId ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
+                    <DialogTitle>{editingCampaignId ? "Edit Campaign" : "Create Campaign"}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <Input
@@ -397,10 +474,11 @@ export default function AdminDashboard() {
                     />
                     <Input
                       placeholder="Target Amount"
+                      type="number"
                       value={campaignForm.targetAmount}
                       onChange={(e) => setCampaignForm({ ...campaignForm, targetAmount: e.target.value })}
                     />
-                    <Select value={campaignForm.status} onValueChange={(value: any) => setCampaignForm({ ...campaignForm, status: value })}>
+                    <Select value={campaignForm.status} onValueChange={(value: CampaignStatus) => setCampaignForm({ ...campaignForm, status: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -415,7 +493,7 @@ export default function AdminDashboard() {
                       className="w-full bg-purple-600 hover:bg-purple-700"
                       disabled={createCampaignMutation.isPending || updateCampaignMutation.isPending}
                     >
-                      {editingId ? "Update" : "Create"} Campaign
+                      {editingCampaignId ? "Update" : "Create"} Campaign
                     </Button>
                   </div>
                 </DialogContent>
@@ -424,69 +502,78 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Campaigns</CardTitle>
-                <CardDescription>Manage fundraising campaigns</CardDescription>
+                <CardDescription>Manage fundraising campaigns shown on the homepage</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {campaigns.map((campaign) => (
-                    <Card key={campaign.id} className="border border-purple-200">
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{campaign.title}</CardTitle>
-                            <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700">
-                              {campaign.status}
-                            </span>
+                {campaignsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                ) : campaigns.length === 0 ? (
+                  <EmptyState label="No campaigns yet — create one to show it on the homepage" />
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {campaigns.map((campaign) => (
+                      <Card key={campaign.id} className="border border-purple-200">
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg">{campaign.title}</CardTitle>
+                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-700">
+                                {campaign.status}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <p className="text-sm text-gray-600">{campaign.description}</p>
-                        <p className="text-sm font-semibold text-purple-600">Target: {campaign.targetAmount}</p>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingId(campaign.id);
-                              setCampaignForm({
-                                title: campaign.title,
-                                description: campaign.description || "",
-                                imageUrl: campaign.imageUrl || "",
-                                targetAmount: campaign.targetAmount || "",
-                                status: campaign.status as any,
-                              });
-                              setIsDialogOpen(true);
-                            }}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteCampaignMutation.mutate({ id: campaign.id })}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <p className="text-sm text-gray-600 line-clamp-2">{campaign.description}</p>
+                          <p className="text-sm font-semibold text-purple-600">
+                            {formatAmount(campaign.raisedAmount)} raised of {formatAmount(campaign.targetAmount)}
+                          </p>
+                          <div className="flex gap-2 pt-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingCampaignId(campaign.id);
+                                setCampaignForm({
+                                  title: campaign.title,
+                                  description: campaign.description || "",
+                                  imageUrl: campaign.imageUrl || "",
+                                  targetAmount: campaign.targetAmount != null ? String(campaign.targetAmount) : "",
+                                  status: campaign.status as CampaignStatus,
+                                });
+                                setIsCampaignDialogOpen(true);
+                              }}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => deleteCampaignMutation.mutate({ id: campaign.id })}
+                              disabled={deleteCampaignMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Events Tab */}
-          <TabsContent value="events" className="space-y-4">
+          <TabsContent value="events" className="space-y-4 mt-6">
             <div className="flex justify-end">
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
                     className="bg-purple-600 hover:bg-purple-700"
                     onClick={() => {
-                      setEditingId(null);
-                      setEventForm({ title: "", description: "", imageUrl: "", date: "", location: "", status: "upcoming" });
+                      setEditingEventId(null);
+                      setEventForm(emptyEventForm);
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
@@ -495,7 +582,7 @@ export default function AdminDashboard() {
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>{editingId ? "Edit Event" : "Create Event"}</DialogTitle>
+                    <DialogTitle>{editingEventId ? "Edit Event" : "Create Event"}</DialogTitle>
                   </DialogHeader>
                   <div className="space-y-4">
                     <Input
@@ -523,7 +610,7 @@ export default function AdminDashboard() {
                       value={eventForm.location}
                       onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
                     />
-                    <Select value={eventForm.status} onValueChange={(value: any) => setEventForm({ ...eventForm, status: value })}>
+                    <Select value={eventForm.status} onValueChange={(value: EventStatus) => setEventForm({ ...eventForm, status: value })}>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -538,7 +625,7 @@ export default function AdminDashboard() {
                       className="w-full bg-purple-600 hover:bg-purple-700"
                       disabled={createEventMutation.isPending || updateEventMutation.isPending}
                     >
-                      {editingId ? "Update" : "Create"} Event
+                      {editingEventId ? "Update" : "Create"} Event
                     </Button>
                   </div>
                 </DialogContent>
@@ -547,57 +634,64 @@ export default function AdminDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Events</CardTitle>
-                <CardDescription>Manage upcoming and past events</CardDescription>
+                <CardDescription>Manage upcoming and past events shown on the homepage</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-4 md:grid-cols-2">
-                  {events.map((event) => (
-                    <Card key={event.id} className="border border-purple-200">
-                      <CardHeader className="pb-3">
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <CardTitle className="text-lg">{event.title}</CardTitle>
-                            <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
-                              {event.status}
-                            </span>
+                {eventsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-purple-600" /></div>
+                ) : events.length === 0 ? (
+                  <EmptyState label="No events yet — create one to show it on the homepage" />
+                ) : (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {events.map((event) => (
+                      <Card key={event.id} className="border border-yellow-200">
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg">{event.title}</CardTitle>
+                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-700">
+                                {event.status}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <p className="text-sm text-gray-600">{event.description}</p>
-                        <p className="text-sm font-semibold text-purple-600">📅 {event.date}</p>
-                        <p className="text-sm text-gray-600">📍 {event.location || "N/A"}</p>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingId(event.id);
-                              setEventForm({
-                                title: event.title,
-                                description: event.description || "",
-                                imageUrl: event.imageUrl || "",
-                                date: event.date,
-                                location: event.location || "",
-                                status: event.status as any,
-                              });
-                              setIsDialogOpen(true);
-                            }}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => deleteEventMutation.mutate({ id: event.id })}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardHeader>
+                        <CardContent className="space-y-2">
+                          <p className="text-sm text-gray-600 line-clamp-2">{event.description}</p>
+                          <p className="text-sm font-semibold text-purple-600">{formatDate(event.eventDate)}</p>
+                          <p className="text-sm text-gray-600">{event.location || "N/A"}</p>
+                          <div className="flex gap-2 pt-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingEventId(event.id);
+                                setEventForm({
+                                  title: event.title,
+                                  description: event.description || "",
+                                  imageUrl: event.imageUrl || "",
+                                  date: event.eventDate ? event.eventDate.slice(0, 10) : "",
+                                  location: event.location || "",
+                                  status: event.status as EventStatus,
+                                });
+                                setIsEventDialogOpen(true);
+                              }}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => deleteEventMutation.mutate({ id: event.id })}
+                              disabled={deleteEventMutation.isPending}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

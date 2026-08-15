@@ -4,7 +4,7 @@ import type { TrpcContext } from "./_core/context";
 import type { User } from "../drizzle/schema";
 
 // Mock context for testing
-function createMockContext(user?: Partial<User>): TrpcContext {
+function createMockContext(user?: Partial<User>, isAdmin = false): TrpcContext {
   return {
     user: user
       ? ({
@@ -20,13 +20,14 @@ function createMockContext(user?: Partial<User>): TrpcContext {
           ...user,
         } as User)
       : null,
+    adminUser: isAdmin ? { sub: "test-admin", email: "admin@example.com" } : null,
     req: {
       protocol: "https",
       headers: {},
     } as TrpcContext["req"],
     res: {
       clearCookie: () => {},
-    } as TrpcContext["res"],
+    } as unknown as TrpcContext["res"],
   };
 }
 
@@ -52,7 +53,7 @@ describe("Form Submission Procedures", () => {
     const result = await caller.forms.submitDonation({
       donorName: "Jane Smith",
       donorEmail: "jane@example.com",
-      amount: "5000 NGN",
+      amount: "5000",
       message: "Supporting your mission",
     });
 
@@ -77,24 +78,24 @@ describe("Form Submission Procedures", () => {
 });
 
 describe("Admin Dashboard Access Control", () => {
-  it("should allow admin to access contacts", async () => {
-    const ctx = createMockContext({ role: "admin" });
+  it("should allow admin session to access contacts", async () => {
+    const ctx = createMockContext(undefined, true);
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.admin.getContacts();
     expect(Array.isArray(result)).toBe(true);
   });
 
-  it("should allow admin to access donations", async () => {
-    const ctx = createMockContext({ role: "admin" });
+  it("should allow admin session to access donations", async () => {
+    const ctx = createMockContext(undefined, true);
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.admin.getDonations();
     expect(Array.isArray(result)).toBe(true);
   });
 
-  it("should allow admin to access volunteers", async () => {
-    const ctx = createMockContext({ role: "admin" });
+  it("should allow admin session to access volunteers", async () => {
+    const ctx = createMockContext(undefined, true);
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.admin.getVolunteers();
@@ -109,7 +110,7 @@ describe("Admin Dashboard Access Control", () => {
       await caller.admin.getContacts();
       expect.fail("Should have thrown an error");
     } catch (error: any) {
-      expect(error.code).toBe("FORBIDDEN");
+      expect(error.code).toBe("UNAUTHORIZED");
     }
   });
 
@@ -121,7 +122,7 @@ describe("Admin Dashboard Access Control", () => {
       await caller.admin.getDonations();
       expect.fail("Should have thrown an error");
     } catch (error: any) {
-      expect(error.code).toBe("FORBIDDEN");
+      expect(error.code).toBe("UNAUTHORIZED");
     }
   });
 
@@ -133,7 +134,7 @@ describe("Admin Dashboard Access Control", () => {
       await caller.admin.getVolunteers();
       expect.fail("Should have thrown an error");
     } catch (error: any) {
-      expect(error.code).toBe("FORBIDDEN");
+      expect(error.code).toBe("UNAUTHORIZED");
     }
   });
 

@@ -1,117 +1,101 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/Logo";
 import { useLocation } from "wouter";
-import { Lock, LogIn } from "lucide-react";
-import { startLogin } from "@/const";
+import { LogIn, Loader2, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 export default function AdminLogin() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated, loading, login, isLoggingIn } = useAdminAuth();
   const [, setLocation] = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  // If user is already authenticated and is admin, redirect to dashboard
-  if (isAuthenticated && user?.role === "admin") {
+  if (isAuthenticated) {
     setLocation("/admin");
     return null;
   }
 
-  // If user is authenticated but not admin, show access denied
-  if (isAuthenticated && user?.role !== "admin") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-yellow-50 flex items-center justify-center px-4">
-        <Card className="w-full max-w-md border-red-200">
-          <CardHeader className="text-center">
-            <div className="flex justify-center mb-4">
-              <div className="bg-red-100 p-4 rounded-full">
-                <Lock className="w-8 h-8 text-red-600" />
-              </div>
-            </div>
-            <CardTitle className="text-red-600">Access Denied</CardTitle>
-            <CardDescription>You don't have permission to access the admin dashboard.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-gray-600 text-center">
-              Only administrators can access this area. If you believe this is an error, please contact the site administrator.
-            </p>
-            <Button onClick={() => setLocation("/")} className="w-full bg-purple-600 hover:bg-purple-700">
-              Return to Home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await login(email, password);
+      toast.success("Welcome back!");
+      setLocation("/admin");
+    } catch (error: any) {
+      toast.error(error?.message || "Invalid email or password");
+    }
+  };
 
-  // If not authenticated, show login prompt
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-yellow-50 flex items-center justify-center px-4">
-      <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-in-up {
-          animation: fadeInUp 0.6s ease-out forwards;
-        }
-
-        button:active {
-          transform: scale(0.97);
-          transition: transform 0.1s ease;
-        }
-      `}</style>
-
-      <Card className="w-full max-w-md border-purple-200 animate-fade-in-up">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <img src="/manus-storage/chafhein-logo_138241eb.png" alt="CHAFHEIN" className="h-12 w-12" />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-yellow-50 flex items-center justify-center px-4">
+      <Card className="w-full max-w-md border-purple-200 shadow-xl shadow-purple-100/50 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <CardHeader className="text-center space-y-3">
+          <div className="flex justify-center">
+            <Logo className="h-14 w-14" title={false} />
           </div>
           <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
           <CardDescription>Sign in to manage CHAFHEI content</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-            <p className="text-sm text-gray-700 text-center">
-              This is a restricted area for administrators only. Sign in with your account to access the dashboard.
-            </p>
-          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label htmlFor="admin-email" className="text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <Input
+                id="admin-email"
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@chafhein.ng"
+                required
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="admin-password" className="text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="relative">
+                <Input
+                  id="admin-password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
 
-          <div className="space-y-3">
-            <h3 className="font-semibold text-gray-900">Admin Features:</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                Manage campaigns and events
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                View contact submissions
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                Track donations and volunteers
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-purple-600 rounded-full"></span>
-                Export reports to PDF
-              </li>
-            </ul>
-          </div>
-
-          <Button
-            onClick={startLogin}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 text-lg"
-          >
-            <LogIn className="w-5 h-5 mr-2" />
-            Sign In with Manus
-          </Button>
+            <Button
+              type="submit"
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 text-base"
+              disabled={isLoggingIn || loading}
+            >
+              {isLoggingIn ? (
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+              ) : (
+                <LogIn className="w-5 h-5 mr-2" />
+              )}
+              Sign In
+            </Button>
+          </form>
 
           <Button
             onClick={() => setLocation("/")}

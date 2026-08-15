@@ -43,3 +43,23 @@ export const adminProcedure = t.procedure.use(
     });
   }),
 );
+
+// CHAFHEI admin dashboard auth: a self-hosted email/password session (see
+// server/_core/adminSession.ts), independent of the Manus `user`/`adminProcedure`
+// above which requires OAuth infra this deployment doesn't have.
+export const adminAuthProcedure = t.procedure.use(
+  t.middleware(async opts => {
+    const { ctx, next } = opts;
+
+    if (!ctx.adminUser) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: NOT_ADMIN_ERR_MSG });
+    }
+
+    return next({
+      ctx: {
+        ...ctx,
+        adminUser: ctx.adminUser,
+      },
+    });
+  }),
+);

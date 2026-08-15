@@ -1,11 +1,20 @@
 import { getSessionCookieOptions } from "./_core/cookies";
 import { COOKIE_NAME } from "@shared/const";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
+import { publicProcedure, router, adminAuthProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { createContact, getContacts, createDonation, getDonations, createVolunteer, getVolunteers, createCampaign, getCampaigns, updateCampaign, deleteCampaign, createEvent, getEvents, updateEvent, deleteEvent } from "./supabase";
+import {
+  createContact, getContacts,
+  createDonation, getDonations,
+  createVolunteer, getVolunteers,
+  createCampaign, getCampaigns, updateCampaign, deleteCampaign,
+  createEvent, getEvents, updateEvent, deleteEvent,
+  getAdminByEmail,
+} from "./supabase";
 import { createCheckoutSession } from "./stripe";
+import { verifyPassword } from "./_core/password";
+import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
 
 export const appRouter = router({
   system: systemRouter,
@@ -17,6 +26,37 @@ export const appRouter = router({
       return {
         success: true,
       } as const;
+    }),
+  }),
+
+  // Admin dashboard authentication. Self-hosted email/password login against
+  // the `admins` table, independent of the (non-functional, outside the Manus
+  // platform) OAuth flow used by `auth` above.
+  adminAuth: router({
+    me: publicProcedure.query(({ ctx }) => {
+      return ctx.adminUser ? { email: ctx.adminUser.email } : null;
+    }),
+
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email("Invalid email"),
+        password: z.string().min(1, "Password is required"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const admin = await getAdminByEmail(input.email);
+        if (!admin || !verifyPassword(input.password, admin.passwordHash)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+        }
+
+        const token = await signAdminSession({ sub: admin.id, email: admin.email });
+        setAdminSessionCookie(ctx.res, token);
+
+        return { success: true, email: admin.email };
+      }),
+
+    logout: publicProcedure.mutation(({ ctx }) => {
+      clearAdminSessionCookie(ctx.res);
+      return { success: true } as const;
     }),
   }),
 
@@ -38,6 +78,7 @@ export const appRouter = router({
         donorName: z.string().min(1, "Name is required"),
         donorEmail: z.string().email("Invalid email"),
         message: z.string().optional(),
+        paymentReference: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         await createDonation(input);
@@ -78,58 +119,35 @@ export const appRouter = router({
       }),
   }),
 
+  // Read-only, publicly available content the homepage renders live from the
+  // database, kept in sync with what admins manage in the dashboard.
+  content: router({
+    getCampaigns: publicProcedure.query(async () => {
+      return await getCampaigns();
+    }),
+    getEvents: publicProcedure.query(async () => {
+      return await getEvents();
+    }),
+  }),
+
   admin: router({
-    getContacts: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .query(async () => {
-        return await getContacts();
-      }),
+    getContacts: adminAuthProcedure.query(async () => {
+      return await getContacts();
+    }),
 
-    getDonations: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .query(async () => {
-        return await getDonations();
-      }),
+    getDonations: adminAuthProcedure.query(async () => {
+      return await getDonations();
+    }),
 
-    getVolunteers: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .query(async () => {
-        return await getVolunteers();
-      }),
+    getVolunteers: adminAuthProcedure.query(async () => {
+      return await getVolunteers();
+    }),
 
-    getCampaigns: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .query(async () => {
-        return await getCampaigns();
-      }),
+    getCampaigns: adminAuthProcedure.query(async () => {
+      return await getCampaigns();
+    }),
 
-    createCampaign: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
+    createCampaign: adminAuthProcedure
       .input(z.object({
         title: z.string().min(1, "Title is required"),
         description: z.string().optional(),
@@ -142,21 +160,15 @@ export const appRouter = router({
           title: input.title,
           description: input.description || '',
           image: input.imageUrl,
-          targetAmount: input.targetAmount ? parseInt(input.targetAmount) : undefined,
+          targetAmount: input.targetAmount ? parseFloat(input.targetAmount) : undefined,
           status: input.status,
         });
         return { success: true, message: "Campaign created" };
       }),
 
-    updateCampaign: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
+    updateCampaign: adminAuthProcedure
       .input(z.object({
-        id: z.number(),
+        id: z.string(),
         title: z.string().optional(),
         description: z.string().optional(),
         imageUrl: z.string().optional(),
@@ -165,46 +177,28 @@ export const appRouter = router({
         status: z.enum(["active", "completed", "paused"]).optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, targetAmount, currentAmount, ...data } = input;
+        const { id, imageUrl, targetAmount, currentAmount, ...data } = input;
         await updateCampaign(id, {
           ...data,
-          targetAmount: targetAmount ? parseInt(targetAmount) : undefined,
-          currentAmount: currentAmount ? parseInt(currentAmount) : undefined,
+          image: imageUrl,
+          targetAmount: targetAmount ? parseFloat(targetAmount) : undefined,
+          currentAmount: currentAmount ? parseFloat(currentAmount) : undefined,
         });
         return { success: true, message: "Campaign updated" };
       }),
 
-    deleteCampaign: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .input(z.object({ id: z.number() }))
+    deleteCampaign: adminAuthProcedure
+      .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         await deleteCampaign(input.id);
         return { success: true, message: "Campaign deleted" };
       }),
 
-    getEvents: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .query(async () => {
-        return await getEvents();
-      }),
+    getEvents: adminAuthProcedure.query(async () => {
+      return await getEvents();
+    }),
 
-    createEvent: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
+    createEvent: adminAuthProcedure
       .input(z.object({
         title: z.string().min(1, "Title is required"),
         description: z.string().optional(),
@@ -225,15 +219,9 @@ export const appRouter = router({
         return { success: true, message: "Event created" };
       }),
 
-    updateEvent: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
+    updateEvent: adminAuthProcedure
       .input(z.object({
-        id: z.number(),
+        id: z.string(),
         title: z.string().optional(),
         description: z.string().optional(),
         imageUrl: z.string().optional(),
@@ -242,19 +230,17 @@ export const appRouter = router({
         status: z.enum(["upcoming", "ongoing", "completed"]).optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await updateEvent(id, data);
+        const { id, imageUrl, date, ...data } = input;
+        await updateEvent(id, {
+          ...data,
+          image: imageUrl,
+          eventDate: date,
+        });
         return { success: true, message: "Event updated" };
       }),
 
-    deleteEvent: protectedProcedure
-      .use(async ({ ctx, next }) => {
-        if (ctx.user?.role !== 'admin') {
-          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
-        }
-        return next({ ctx });
-      })
-      .input(z.object({ id: z.number() }))
+    deleteEvent: adminAuthProcedure
+      .input(z.object({ id: z.string() }))
       .mutation(async ({ input }) => {
         await deleteEvent(input.id);
         return { success: true, message: "Event deleted" };

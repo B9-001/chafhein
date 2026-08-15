@@ -6,6 +6,8 @@
 dist/
 build/
 *.dist
+# Generated Vercel serverless function bundle (built by `npm run vercel-build`)
+/api/index.js
 
 # Environment variables
 .env

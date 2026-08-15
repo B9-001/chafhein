@@ -18,17 +18,17 @@ const services = [
   { icon: "🌍", title: "Community Health", desc: "Community-led health initiatives and awareness" },
 ];
 
-const upcomingEvents = [
-  { date: "August 15, 2026", title: "Health Awareness Campaign", location: "Asokoro, Abuja", desc: "Community health screening and awareness program" },
-  { date: "August 22, 2026", title: "Girl Child Education Summit", location: "Asokoro, Abuja", desc: "Forum on empowering girls through education" },
-  { date: "September 5, 2026", title: "Volunteer Training Workshop", location: "Asokoro, Abuja", desc: "Capacity building for new volunteers" },
-  { date: "September 12, 2026", title: "Community Outreach Program", location: "Asokoro, Abuja", desc: "Direct engagement with community members" },
-];
-
 function formatNaira(value: string | number | null | undefined) {
   const num = Number(value ?? 0);
   if (Number.isNaN(num)) return "₦0";
   return `₦${num.toLocaleString()}`;
+}
+
+function formatEventDate(value: string | null | undefined) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
 export default function Home() {
@@ -43,6 +43,7 @@ export default function Home() {
   });
 
   const { data: campaigns = [], isLoading: campaignsLoading } = trpc.content.getCampaigns.useQuery();
+  const { data: events = [], isLoading: eventsLoading } = trpc.content.getEvents.useQuery();
 
   const submitContact = trpc.forms.submitContact.useMutation({
     onSuccess: () => {
@@ -568,27 +569,51 @@ export default function Home() {
             <p className="text-sm font-semibold tracking-wide text-accent uppercase mb-2">What's Next</p>
             <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">Upcoming Events</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {upcomingEvents.map((event, i) => (
-              <Card key={i} className="card-hover border-border hover:border-brand-gold animate-scale-in overflow-hidden pt-0" style={{ animationDelay: `${i * 0.1}s` }}>
-                <div className="relative h-28 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
-                  <Calendar className="w-10 h-10 text-accent-foreground/90" />
-                  <span className="absolute top-3 left-3 bg-white text-accent text-xs font-semibold px-3 py-1 rounded-full shadow">
-                    {event.date}
-                  </span>
+          {eventsLoading ? (
+            <p className="text-center text-muted-foreground">Loading events…</p>
+          ) : events.length === 0 ? (
+            <Card className="max-w-2xl mx-auto text-center border-border">
+              <CardContent className="pt-6 flex flex-col items-center gap-4">
+                <div className="h-16 w-16 rounded-full bg-brand-cream-deep flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-accent" />
                 </div>
-                <CardHeader>
-                  <CardTitle>{event.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" /> {event.location}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{event.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                <p className="text-foreground font-semibold">No events scheduled right now</p>
+                <p className="text-muted-foreground">
+                  Check back soon for upcoming events, or follow us on social media for the latest updates.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+              {events.map((event) => (
+                <Card key={event.id} className="card-hover border-border hover:border-brand-gold animate-scale-in overflow-hidden pt-0">
+                  {event.imageUrl ? (
+                    <img src={event.imageUrl} alt="" className="h-28 w-full object-cover" />
+                  ) : (
+                    <div className="relative h-28 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
+                      <Calendar className="w-10 h-10 text-accent-foreground/90" />
+                    </div>
+                  )}
+                  <CardHeader>
+                    <span className="inline-block w-fit text-xs font-semibold uppercase tracking-wide text-accent bg-brand-cream-deep px-2 py-1 rounded-full">
+                      {formatEventDate(event.eventDate)}
+                    </span>
+                    <CardTitle>{event.title}</CardTitle>
+                    {event.location && (
+                      <CardDescription className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" /> {event.location}
+                      </CardDescription>
+                    )}
+                  </CardHeader>
+                  {event.description && (
+                    <CardContent>
+                      <p className="text-muted-foreground">{event.description}</p>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

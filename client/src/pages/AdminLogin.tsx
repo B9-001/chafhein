@@ -44,7 +44,7 @@ export default function AdminLogin() {
             <Logo className="h-14 w-14" title={false} />
           </div>
           <CardTitle className="text-2xl">Admin Dashboard</CardTitle>
-          <CardDescription>Sign in to manage CHAFHEI content</CardDescription>
+          <CardDescription>Sign in to manage CHAFHEIN content</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-4">

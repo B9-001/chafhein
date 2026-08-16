@@ -96,7 +96,7 @@ export default function Home() {
   };
 
   const paystackConfig = {
-    reference: `CHAFHEI-${Date.now()}`,
+    reference: `CHAFHEIN-${Date.now()}`,
     email: formData.email,
     amount: parseInt(formData.amount || '0') * 100,
     publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || 'pk_test_d62a19c25a9338eb2d7009f86eb1ebc35abcdbb8',
@@ -348,7 +348,7 @@ export default function Home() {
               Let's Build The <span className="brand-mark">Better World</span> Together
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Connected Hands for Family Health and Empowerment Initiative (CHAFHEI) is a youth-led, non-profit organization dedicated to creating sustainable change through healthcare, education, and community empowerment.
+              Connected Hands for Family Health and Empowerment Initiative (CHAFHEIN) is a youth-led, non-profit organization dedicated to creating sustainable change through healthcare, education, and community empowerment.
             </p>
             <p className="text-base sm:text-lg text-accent font-semibold">
               Our Mission: To empower communities through accessible healthcare, quality education, and sustainable development initiatives.
@@ -389,10 +389,10 @@ export default function Home() {
               <span className="h-px w-8 bg-brand-gold" />
               <span className="text-sm font-semibold tracking-wide text-accent uppercase">Know About Us</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">About CHAFHEI</h2>
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground">About CHAFHEIN</h2>
             <div className="space-y-4 text-base sm:text-lg text-foreground/80 leading-relaxed">
               <p>
-                <strong className="text-accent">Connected Hands for Family Health and Empowerment Initiative (CHAFHEI)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
+                <strong className="text-accent">Connected Hands for Family Health and Empowerment Initiative (CHAFHEIN)</strong> is a youth-led, non-profit organization committed to creating sustainable change in communities across Nigeria.
               </p>
               <p>
                 We believe that every individual deserves access to quality healthcare, education, and opportunities for personal development. Our work focuses on bridging the gap between healthcare access, education, and community empowerment.
@@ -867,7 +867,7 @@ export default function Home() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto border-t border-white/10 mt-12 pt-6 text-center">
-          <p className="text-white/60 text-sm">&copy; 2026 Connected Hands for Family Health and Empowerment Initiative (CHAFHEI). All rights reserved.</p>
+          <p className="text-white/60 text-sm">&copy; 2026 Connected Hands for Family Health and Empowerment Initiative (CHAFHEIN). All rights reserved.</p>
         </div>
       </footer>
     </div>

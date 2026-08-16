@@ -70,10 +70,10 @@
 - Responsive design verified on mobile, tablet, and desktop
 
 
-## Updates - Phase 2 (Purple & Yellow Theme + Stripe + Enhanced Admin)
+## Updates - Phase 2 (Purple & Yellow Theme + Enhanced Admin)
 - [x] Update color palette from green to purple and yellow
 - [x] Remove admin button from navigation bar
-- [x] Integrate Stripe payment gateway for donations (server procedure added, ready for API keys)
+- [x] Integrate Stripe payment gateway for donations (server procedure added, ready for API keys) — later removed in favor of Paystack-only checkout
 - [x] Update logo to new CHAFHEIN logo image
 - [x] Add campaigns table to database
 - [x] Add events table to database

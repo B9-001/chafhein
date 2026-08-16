@@ -56,8 +56,8 @@ function ImageUploadField({ imageUrl, onChange }: { imageUrl: string; onChange: 
       toast.error("Please choose an image file");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Image must be 8MB or smaller");
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error("Image must be 3MB or smaller");
       return;
     }
 

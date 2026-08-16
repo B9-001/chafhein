@@ -14,9 +14,12 @@ import { createContext } from "./context";
  */
 export function createApp(): Express {
   const app = express();
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Body parser size limit. Kept just under Vercel's hard 4.5MB serverless
+  // request-body cap (see the admin.uploadImage guard in routers.ts, which
+  // limits base64 image payloads to comfortably fit inside this) so
+  // self-hosted (`npm start`) and Vercel deployments behave consistently.
+  app.use(express.json({ limit: "5mb" }));
+  app.use(express.urlencoded({ limit: "5mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // tRPC API

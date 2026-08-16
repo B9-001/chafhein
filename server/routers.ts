@@ -12,7 +12,6 @@ import {
   createEvent, getEvents, updateEvent, deleteEvent,
   getAdminByEmail, uploadMedia,
 } from "./supabase";
-import { createCheckoutSession } from "./stripe";
 import { verifyPassword } from "./_core/password";
 import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
 
@@ -101,22 +100,6 @@ export const appRouter = router({
         });
         return { success: true, message: "Volunteer application received" };
       }),
-
-    createStripeCheckout: publicProcedure
-      .input(z.object({
-        amount: z.number().min(1, "Amount must be greater than 0"),
-        donorName: z.string().min(1, "Name is required"),
-        donorEmail: z.string().email("Invalid email"),
-      }))
-      .mutation(async ({ input }) => {
-        try {
-          const session = await createCheckoutSession(input.amount, input.donorEmail, input.donorName);
-          return { success: true, sessionId: session.id, url: session.url };
-        } catch (error) {
-          console.error("Stripe error:", error);
-          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create payment session' });
-        }
-      }),
   }),
 
   // Read-only, publicly available content the homepage renders live from the
@@ -138,9 +121,15 @@ export const appRouter = router({
         dataBase64: z.string().min(1),
       }))
       .mutation(async ({ input }) => {
+        // Vercel serverless functions hard-cap the request body at 4.5MB,
+        // regardless of the Express body-parser limit set below. Base64
+        // encoding inflates the raw file size by ~4/3, so a 3MB source
+        // image becomes ~4MB of base64 — keep the ceiling comfortably
+        // under the platform limit so uploads fail fast client-side
+        // instead of being rejected by the platform with an opaque 413.
         const approxBytes = (input.dataBase64.length * 3) / 4;
-        if (approxBytes > 8 * 1024 * 1024) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "Image must be 8MB or smaller" });
+        if (approxBytes > 3 * 1024 * 1024) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Image must be 3MB or smaller" });
         }
         const url = await uploadMedia(input.fileName, input.contentType, input.dataBase64);
         return { url };

@@ -44,7 +44,7 @@ export const adminProcedure = t.procedure.use(
   }),
 );
 
-// CHAFHEI admin dashboard auth: a self-hosted email/password session (see
+// CHAFHEIN admin dashboard auth: a self-hosted email/password session (see
 // server/_core/adminSession.ts), independent of the Manus `user`/`adminProcedure`
 // above which requires OAuth infra this deployment doesn't have.
 export const adminAuthProcedure = t.procedure.use(

@@ -35,6 +35,7 @@ const emptyEventForm = {
   date: "",
   location: "",
   status: "upcoming" as EventStatus,
+  webinarLink: "",
 };
 
 function fileToBase64(file: File): Promise<string> {
@@ -763,6 +764,17 @@ export default function AdminDashboard() {
                       value={eventForm.location}
                       onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
                     />
+                    <div className="space-y-1.5">
+                      <Input
+                        type="url"
+                        placeholder="Webinar Link (optional)"
+                        value={eventForm.webinarLink}
+                        onChange={(e) => setEventForm({ ...eventForm, webinarLink: e.target.value })}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        If set, this event is treated as a webinar — registrants automatically receive this link by email.
+                      </p>
+                    </div>
                     <Select value={eventForm.status} onValueChange={(value: EventStatus) => setEventForm({ ...eventForm, status: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -802,9 +814,16 @@ export default function AdminDashboard() {
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
                               <CardTitle className="text-lg">{event.title}</CardTitle>
-                              <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-brand-gold/20 text-brand-green-dark">
-                                {event.status}
-                              </span>
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                <span className="inline-block px-2 py-1 text-xs rounded-full bg-brand-gold/20 text-brand-green-dark">
+                                  {event.status}
+                                </span>
+                                {event.webinarLink && (
+                                  <span className="inline-block px-2 py-1 text-xs rounded-full bg-accent/10 text-accent">
+                                    Webinar
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </CardHeader>
@@ -825,6 +844,7 @@ export default function AdminDashboard() {
                                   date: event.eventDate ? event.eventDate.slice(0, 10) : "",
                                   location: event.location || "",
                                   status: event.status as EventStatus,
+                                  webinarLink: event.webinarLink || "",
                                 });
                                 setIsEventDialogOpen(true);
                               }}

@@ -52,7 +52,7 @@ export default function Home() {
     skills: "",
   });
 
-  const [registeringEvent, setRegisteringEvent] = useState<{ id: string; title: string } | null>(null);
+  const [registeringEvent, setRegisteringEvent] = useState<{ id: string; title: string; webinarLink: string | null } | null>(null);
   const [registrationForm, setRegistrationForm] = useState({ name: "", email: "", phone: "" });
 
   const { data: campaigns = [], isLoading: campaignsLoading } = trpc.content.getCampaigns.useQuery();
@@ -93,7 +93,11 @@ export default function Home() {
 
   const submitEventRegistration = trpc.forms.submitEventRegistration.useMutation({
     onSuccess: () => {
-      toast.success("You're registered! We'll see you there.");
+      toast.success(
+        registeringEvent?.webinarLink
+          ? "You're registered! Check your email for the webinar link."
+          : "You're registered! We'll see you there."
+      );
       setRegistrationForm({ name: "", email: "", phone: "" });
       setRegisteringEvent(null);
     },
@@ -630,9 +634,16 @@ export default function Home() {
                     </div>
                   )}
                   <CardHeader>
-                    <span className="inline-block w-fit text-xs font-semibold uppercase tracking-wide text-accent bg-brand-cream-deep px-2 py-1 rounded-full">
-                      {formatEventDate(event.eventDate)}
-                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="inline-block w-fit text-xs font-semibold uppercase tracking-wide text-accent bg-brand-cream-deep px-2 py-1 rounded-full">
+                        {formatEventDate(event.eventDate)}
+                      </span>
+                      {event.webinarLink && (
+                        <span className="inline-block w-fit text-xs font-semibold uppercase tracking-wide text-accent-foreground bg-accent px-2 py-1 rounded-full">
+                          Webinar
+                        </span>
+                      )}
+                    </div>
                     <CardTitle>{event.title}</CardTitle>
                     {event.location && (
                       <CardDescription className="flex items-center gap-1">
@@ -648,10 +659,10 @@ export default function Home() {
                   {event.status !== "completed" && (
                     <CardContent>
                       <Button
-                        onClick={() => setRegisteringEvent({ id: event.id, title: event.title })}
+                        onClick={() => setRegisteringEvent({ id: event.id, title: event.title, webinarLink: event.webinarLink })}
                         className="w-full bg-accent hover:bg-brand-orange-dark text-accent-foreground"
                       >
-                        Register for this Event
+                        {event.webinarLink ? "Register for Webinar" : "Register for this Event"}
                       </Button>
                     </CardContent>
                   )}
@@ -671,7 +682,9 @@ export default function Home() {
             <DialogHeader>
               <DialogTitle>Register for {registeringEvent?.title}</DialogTitle>
               <DialogDescription>
-                We'll send you a confirmation and keep you posted on event details.
+                {registeringEvent?.webinarLink
+                  ? "This is a virtual webinar — we'll email you the join link right after you register."
+                  : "We'll send you a confirmation and keep you posted on event details."}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleEventRegistrationSubmit} className="space-y-4">

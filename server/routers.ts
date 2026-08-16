@@ -12,7 +12,18 @@ import {
 } from "./supabase";
 import { verifyPassword } from "./_core/password";
 import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
-import { sendDonationNotification, sendEventRegistrationNotification } from "./_core/email";
+import {
+  sendDonationNotification,
+  sendEventRegistrationNotification,
+  sendEventRegistrationConfirmation,
+} from "./_core/email";
+
+function formatEventDate(value: string | null): string | undefined {
+  if (!value) return undefined;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
 
 export const appRouter = router({
   // Admin dashboard authentication: self-hosted email/password login against
@@ -112,12 +123,25 @@ export const appRouter = router({
           throw error;
         }
 
-        await sendEventRegistrationNotification({
-          eventTitle: registration.eventTitle,
-          name: input.name,
-          email: input.email,
-          phone: input.phone,
-        });
+        // Awaited (not fire-and-forget) for the same reason as donations:
+        // Vercel serverless functions can freeze once the response is sent.
+        await Promise.all([
+          sendEventRegistrationNotification({
+            eventTitle: registration.eventTitle,
+            name: input.name,
+            email: input.email,
+            phone: input.phone,
+            webinarLink: registration.eventWebinarLink,
+          }),
+          sendEventRegistrationConfirmation({
+            eventTitle: registration.eventTitle,
+            eventDate: formatEventDate(registration.eventDate),
+            eventLocation: registration.eventLocation,
+            name: input.name,
+            recipientEmail: input.email,
+            webinarLink: registration.eventWebinarLink,
+          }),
+        ]);
 
         return { success: true, message: "Registration received" };
       }),
@@ -231,6 +255,7 @@ export const appRouter = router({
         date: z.string().min(1, "Date is required"),
         location: z.string().optional(),
         status: z.enum(["upcoming", "ongoing", "completed"]).default("upcoming"),
+        webinarLink: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         await createEvent({
@@ -240,6 +265,7 @@ export const appRouter = router({
           eventDate: input.date,
           location: input.location,
           status: input.status,
+          webinarLink: input.webinarLink,
         });
         return { success: true, message: "Event created" };
       }),
@@ -253,6 +279,7 @@ export const appRouter = router({
         date: z.string().optional(),
         location: z.string().optional(),
         status: z.enum(["upcoming", "ongoing", "completed"]).optional(),
+        webinarLink: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, imageUrl, date, ...data } = input;

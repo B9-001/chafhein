@@ -152,6 +152,7 @@ type EventRow = {
   status: string;
   created_at: string;
   updated_at: string;
+  webinar_link: string | null;
 };
 
 export type EventItem = {
@@ -164,6 +165,7 @@ export type EventItem = {
   status: string;
   createdAt: string;
   updatedAt: string;
+  webinarLink: string | null;
 };
 
 const mapEvent = (row: EventRow): EventItem => ({
@@ -176,6 +178,7 @@ const mapEvent = (row: EventRow): EventItem => ({
   status: row.status,
   createdAt: row.created_at,
   updatedAt: row.updated_at,
+  webinarLink: row.webinar_link,
 });
 
 type EventRegistrationRow = {
@@ -185,13 +188,16 @@ type EventRegistrationRow = {
   email: string;
   phone: string | null;
   created_at: string;
-  events: { title: string } | null;
+  events: { title: string; webinar_link: string | null; event_date: string | null; location: string | null } | null;
 };
 
 export type EventRegistration = {
   id: string;
   eventId: string;
   eventTitle: string;
+  eventWebinarLink: string | null;
+  eventDate: string | null;
+  eventLocation: string | null;
   name: string;
   email: string;
   phone: string | null;
@@ -202,6 +208,9 @@ const mapEventRegistration = (row: EventRegistrationRow): EventRegistration => (
   id: row.id,
   eventId: row.event_id,
   eventTitle: row.events?.title ?? "Unknown event",
+  eventWebinarLink: row.events?.webinar_link ?? null,
+  eventDate: row.events?.event_date ?? null,
+  eventLocation: row.events?.location ?? null,
   name: row.name,
   email: row.email,
   phone: row.phone,
@@ -390,6 +399,7 @@ export async function createEvent(data: {
   eventDate?: string;
   location?: string;
   status?: string;
+  webinarLink?: string;
 }): Promise<EventItem> {
   const { data: result, error } = await requireSupabase()
     .from('events')
@@ -400,6 +410,7 @@ export async function createEvent(data: {
       event_date: data.eventDate || null,
       location: data.location || null,
       status: data.status || 'upcoming',
+      webinar_link: data.webinarLink || null,
     }])
     .select()
     .single();
@@ -415,6 +426,7 @@ export async function updateEvent(id: string, data: Partial<{
   eventDate: string;
   location: string;
   status: string;
+  webinarLink: string;
 }>): Promise<EventItem> {
   const patch: Record<string, unknown> = {};
   if (data.title !== undefined) patch.title = data.title;
@@ -423,6 +435,7 @@ export async function updateEvent(id: string, data: Partial<{
   if (data.eventDate !== undefined) patch.event_date = data.eventDate;
   if (data.location !== undefined) patch.location = data.location;
   if (data.status !== undefined) patch.status = data.status;
+  if (data.webinarLink !== undefined) patch.webinar_link = data.webinarLink || null;
   patch.updated_at = new Date().toISOString();
 
   const { data: result, error } = await requireSupabase()
@@ -458,7 +471,7 @@ export async function createEventRegistration(data: {
       email: data.email,
       phone: data.phone || null,
     }])
-    .select('*, events(title)')
+    .select('*, events(title, webinar_link, event_date, location)')
     .single();
 
   if (error) throw error;
@@ -468,7 +481,7 @@ export async function createEventRegistration(data: {
 export async function getEventRegistrations(): Promise<EventRegistration[]> {
   const { data, error } = await requireSupabase()
     .from('event_registrations')
-    .select('*, events(title)')
+    .select('*, events(title, webinar_link, event_date, location)')
     .order('created_at', { ascending: false });
 
   if (error) throw error;

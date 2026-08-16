@@ -597,9 +597,9 @@ export default function Home() {
               {events.map((event) => (
                 <Card key={event.id} className="card-hover border-border hover:border-brand-gold animate-scale-in overflow-hidden pt-0">
                   {event.imageUrl ? (
-                    <img src={event.imageUrl} alt="" className="h-28 w-full object-cover" />
+                    <img src={event.imageUrl} alt="" className="aspect-video w-full object-cover" />
                   ) : (
-                    <div className="relative h-28 w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
+                    <div className="relative aspect-video w-full bg-gradient-to-br from-brand-ink to-brand-orange-dark flex items-center justify-center">
                       <Calendar className="w-10 h-10 text-accent-foreground/90" />
                     </div>
                   )}

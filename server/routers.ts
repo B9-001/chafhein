@@ -11,6 +11,7 @@ import {
 } from "./supabase";
 import { verifyPassword } from "./_core/password";
 import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
+import { sendDonationNotification } from "./_core/email";
 
 export const appRouter = router({
   // Admin dashboard authentication: self-hosted email/password login against
@@ -65,6 +66,12 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await createDonation(input);
+        // Awaited (not fire-and-forget) because Vercel serverless functions
+        // can freeze/terminate as soon as the response is sent — a detached
+        // async call here risks the email never actually going out.
+        // sendDonationNotification swallows its own errors, so a failed
+        // notification never blocks the donation from being recorded.
+        await sendDonationNotification(input);
         return { success: true, message: "Donation recorded" };
       }),
 

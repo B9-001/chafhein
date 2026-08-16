@@ -146,6 +146,7 @@ export default function AdminDashboard() {
   const { data: volunteers = [], isLoading: volunteersLoading } = trpc.admin.getVolunteers.useQuery(undefined, { enabled: isAuthenticated });
   const { data: campaigns = [], isLoading: campaignsLoading } = trpc.admin.getCampaigns.useQuery(undefined, { enabled: isAuthenticated });
   const { data: events = [], isLoading: eventsLoading } = trpc.admin.getEvents.useQuery(undefined, { enabled: isAuthenticated });
+  const { data: registrations = [], isLoading: registrationsLoading } = trpc.admin.getEventRegistrations.useQuery(undefined, { enabled: isAuthenticated });
 
   const createCampaignMutation = trpc.admin.createCampaign.useMutation({
     onSuccess: () => {
@@ -271,6 +272,37 @@ export default function AdminDashboard() {
     toast.success("Volunteers report downloaded!");
   };
 
+  const exportRegistrationsPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Event Registrations Report", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 25);
+
+    let y = 35;
+    doc.setFont("helvetica", "bold");
+    doc.text("Name", 14, y);
+    doc.text("Email", 55, y);
+    doc.text("Event", 105, y);
+    doc.text("Date", 160, y);
+
+    doc.setFont("helvetica", "normal");
+    registrations.forEach((registration) => {
+      y += 10;
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(registration.name, 14, y);
+      doc.text(registration.email, 55, y);
+      doc.text(registration.eventTitle, 105, y);
+      doc.text(formatDate(registration.createdAt), 160, y);
+    });
+
+    doc.save("event-registrations-report.pdf");
+    toast.success("Event registrations report downloaded!");
+  };
+
   const handleCampaignSubmit = () => {
     if (!campaignForm.title.trim()) {
       toast.error("Campaign title is required");
@@ -354,7 +386,7 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto bg-white border border-border p-1">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto bg-white border border-border p-1">
             <TabsTrigger value="contacts" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Contacts ({contacts.length})
             </TabsTrigger>
@@ -363,6 +395,9 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="volunteers" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Volunteers ({volunteers.length})
+            </TabsTrigger>
+            <TabsTrigger value="registrations" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
+              Registrations ({registrations.length})
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="data-[state=active]:bg-brand-cream-deep data-[state=active]:text-accent">
               Campaigns ({campaigns.length})
@@ -498,6 +533,54 @@ export default function AdminDashboard() {
                             <TableCell>{volunteer.skills || "N/A"}</TableCell>
                             <TableCell className="max-w-xs truncate">{volunteer.message || "N/A"}</TableCell>
                             <TableCell>{formatDate(volunteer.createdAt)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Event Registrations Tab */}
+          <TabsContent value="registrations" className="space-y-4 mt-6">
+            <div className="flex justify-end">
+              <Button onClick={exportRegistrationsPDF} disabled={registrations.length === 0} className="bg-accent hover:bg-brand-orange-dark">
+                <Download className="w-4 h-4 mr-2" />
+                Download PDF
+              </Button>
+            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Event Registrations</CardTitle>
+                <CardDescription>Everyone who has registered to attend an event</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {registrationsLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-accent" /></div>
+                ) : registrations.length === 0 ? (
+                  <EmptyState label="No event registrations yet" />
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-brand-cream-deep">
+                          <TableHead>Name</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
+                          <TableHead>Event</TableHead>
+                          <TableHead>Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {registrations.map((registration) => (
+                          <TableRow key={registration.id}>
+                            <TableCell className="font-medium">{registration.name}</TableCell>
+                            <TableCell>{registration.email}</TableCell>
+                            <TableCell>{registration.phone || "N/A"}</TableCell>
+                            <TableCell>{registration.eventTitle}</TableCell>
+                            <TableCell>{formatDate(registration.createdAt)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

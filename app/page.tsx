@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar, Menu, X, ShieldCheck } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Heart, Users, Handshake, Mail, Phone, MapPin, Instagram, Twitter, ArrowRight, Calendar, Menu, X, ShieldCheck, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
@@ -51,6 +52,9 @@ export default function Home() {
     skills: "",
   });
 
+  const [registeringEvent, setRegisteringEvent] = useState<{ id: string; title: string } | null>(null);
+  const [registrationForm, setRegistrationForm] = useState({ name: "", email: "", phone: "" });
+
   const { data: campaigns = [], isLoading: campaignsLoading } = trpc.content.getCampaigns.useQuery();
   const { data: events = [], isLoading: eventsLoading } = trpc.content.getEvents.useQuery();
 
@@ -86,6 +90,28 @@ export default function Home() {
       toast.error(error.message || "Failed to submit. Please try again.");
     },
   });
+
+  const submitEventRegistration = trpc.forms.submitEventRegistration.useMutation({
+    onSuccess: () => {
+      toast.success("You're registered! We'll see you there.");
+      setRegistrationForm({ name: "", email: "", phone: "" });
+      setRegisteringEvent(null);
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to register. Please try again.");
+    },
+  });
+
+  const handleEventRegistrationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!registeringEvent) return;
+    submitEventRegistration.mutate({
+      eventId: registeringEvent.id,
+      name: registrationForm.name,
+      email: registrationForm.email,
+      phone: registrationForm.phone || undefined,
+    });
+  };
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -615,8 +641,18 @@ export default function Home() {
                     )}
                   </CardHeader>
                   {event.description && (
-                    <CardContent>
+                    <CardContent className={event.status === "completed" ? undefined : "pb-0"}>
                       <p className="text-muted-foreground">{event.description}</p>
+                    </CardContent>
+                  )}
+                  {event.status !== "completed" && (
+                    <CardContent>
+                      <Button
+                        onClick={() => setRegisteringEvent({ id: event.id, title: event.title })}
+                        className="w-full bg-accent hover:bg-brand-orange-dark text-accent-foreground"
+                      >
+                        Register for this Event
+                      </Button>
                     </CardContent>
                   )}
                 </Card>
@@ -624,6 +660,57 @@ export default function Home() {
             </div>
           )}
         </div>
+
+        <Dialog
+          open={registeringEvent !== null}
+          onOpenChange={(open) => {
+            if (!open) setRegisteringEvent(null);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Register for {registeringEvent?.title}</DialogTitle>
+              <DialogDescription>
+                We'll send you a confirmation and keep you posted on event details.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleEventRegistrationSubmit} className="space-y-4">
+              <input
+                type="text"
+                required
+                placeholder="Your Name"
+                value={registrationForm.name}
+                onChange={(e) => setRegistrationForm({ ...registrationForm, name: e.target.value })}
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
+              />
+              <input
+                type="email"
+                required
+                placeholder="Your Email"
+                value={registrationForm.email}
+                onChange={(e) => setRegistrationForm({ ...registrationForm, email: e.target.value })}
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
+              />
+              <input
+                type="tel"
+                placeholder="Phone Number (optional)"
+                value={registrationForm.phone}
+                onChange={(e) => setRegistrationForm({ ...registrationForm, phone: e.target.value })}
+                className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:border-accent"
+              />
+              <Button
+                type="submit"
+                disabled={submitEventRegistration.isPending}
+                className="w-full bg-accent hover:bg-brand-orange-dark text-accent-foreground"
+              >
+                {submitEventRegistration.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
+                Confirm Registration
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </section>
 
       {/* CTA Banner */}

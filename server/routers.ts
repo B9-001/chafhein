@@ -7,11 +7,12 @@ import {
   createVolunteer, getVolunteers,
   createCampaign, getCampaigns, updateCampaign, deleteCampaign,
   createEvent, getEvents, updateEvent, deleteEvent,
+  createEventRegistration, getEventRegistrations,
   getAdminByEmail, uploadMedia,
 } from "./supabase";
 import { verifyPassword } from "./_core/password";
 import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
-import { sendDonationNotification } from "./_core/email";
+import { sendDonationNotification, sendEventRegistrationNotification } from "./_core/email";
 
 export const appRouter = router({
   // Admin dashboard authentication: self-hosted email/password login against
@@ -90,6 +91,35 @@ export const appRouter = router({
           message: input.message,
         });
         return { success: true, message: "Volunteer application received" };
+      }),
+
+    submitEventRegistration: publicProcedure
+      .input(z.object({
+        eventId: z.string().min(1, "Event is required"),
+        name: z.string().min(1, "Name is required"),
+        email: z.string().email("Invalid email"),
+        phone: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        let registration;
+        try {
+          registration = await createEventRegistration(input);
+        } catch (error: any) {
+          // Postgres FK violation — the event doesn't exist (or was deleted).
+          if (error?.code === "23503") {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "This event no longer exists" });
+          }
+          throw error;
+        }
+
+        await sendEventRegistrationNotification({
+          eventTitle: registration.eventTitle,
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+        });
+
+        return { success: true, message: "Registration received" };
       }),
   }),
 
@@ -240,6 +270,10 @@ export const appRouter = router({
         await deleteEvent(input.id);
         return { success: true, message: "Event deleted" };
       }),
+
+    getEventRegistrations: adminAuthProcedure.query(async () => {
+      return await getEventRegistrations();
+    }),
   }),
 });
 

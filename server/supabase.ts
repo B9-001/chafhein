@@ -178,6 +178,36 @@ const mapEvent = (row: EventRow): EventItem => ({
   updatedAt: row.updated_at,
 });
 
+type EventRegistrationRow = {
+  id: string;
+  event_id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  created_at: string;
+  events: { title: string } | null;
+};
+
+export type EventRegistration = {
+  id: string;
+  eventId: string;
+  eventTitle: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  createdAt: string;
+};
+
+const mapEventRegistration = (row: EventRegistrationRow): EventRegistration => ({
+  id: row.id,
+  eventId: row.event_id,
+  eventTitle: row.events?.title ?? "Unknown event",
+  name: row.name,
+  email: row.email,
+  phone: row.phone,
+  createdAt: row.created_at,
+});
+
 export type Admin = { id: string; email: string; passwordHash: string };
 
 // --- Contacts ---
@@ -410,6 +440,39 @@ export async function deleteEvent(id: string): Promise<true> {
   const { error } = await requireSupabase().from('events').delete().eq('id', id);
   if (error) throw error;
   return true;
+}
+
+// --- Event registrations ---
+
+export async function createEventRegistration(data: {
+  eventId: string;
+  name: string;
+  email: string;
+  phone?: string;
+}): Promise<EventRegistration> {
+  const { data: result, error } = await requireSupabase()
+    .from('event_registrations')
+    .insert([{
+      event_id: data.eventId,
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
+    }])
+    .select('*, events(title)')
+    .single();
+
+  if (error) throw error;
+  return mapEventRegistration(result);
+}
+
+export async function getEventRegistrations(): Promise<EventRegistration[]> {
+  const { data, error } = await requireSupabase()
+    .from('event_registrations')
+    .select('*, events(title)')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []).map(mapEventRegistration);
 }
 
 // --- Media uploads ---

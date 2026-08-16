@@ -1,6 +1,3 @@
-import { getSessionCookieOptions } from "./_core/cookies";
-import { COOKIE_NAME } from "@shared/const";
-import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, adminAuthProcedure } from "./_core/trpc";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -16,21 +13,8 @@ import { verifyPassword } from "./_core/password";
 import { signAdminSession, setAdminSessionCookie, clearAdminSessionCookie } from "./_core/adminSession";
 
 export const appRouter = router({
-  system: systemRouter,
-  auth: router({
-    me: publicProcedure.query(opts => opts.ctx.user),
-    logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
-    }),
-  }),
-
-  // Admin dashboard authentication. Self-hosted email/password login against
-  // the `admins` table, independent of the (non-functional, outside the Manus
-  // platform) OAuth flow used by `auth` above.
+  // Admin dashboard authentication: self-hosted email/password login against
+  // the `admins` table.
   adminAuth: router({
     me: publicProcedure.query(({ ctx }) => {
       return ctx.adminUser ? { email: ctx.adminUser.email } : null;
@@ -48,13 +32,13 @@ export const appRouter = router({
         }
 
         const token = await signAdminSession({ sub: admin.id, email: admin.email });
-        setAdminSessionCookie(ctx.res, token);
+        setAdminSessionCookie(ctx.resHeaders, token);
 
         return { success: true, email: admin.email };
       }),
 
     logout: publicProcedure.mutation(({ ctx }) => {
-      clearAdminSessionCookie(ctx.res);
+      clearAdminSessionCookie(ctx.resHeaders);
       return { success: true } as const;
     }),
   }),

@@ -6,8 +6,6 @@
 dist/
 build/
 *.dist
-# Generated Vercel serverless function bundle (built by `npm run vercel-build`)
-/api/index.js
 
 # Environment variables
 .env
@@ -88,6 +86,7 @@ jspm_packages/
 
 # Next.js build output
 .next
+next-env.d.ts
 
 # Nuxt.js build / generate output
 .nuxt
@@ -110,7 +109,4 @@ temp/
 
 # Webdev artifacts (checkpoint zips, migrations, etc.)
 .webdev/
-
-# Manus version file (auto-generated, not part of source)
-client/public/__manus__/version.json
 .project-config.json

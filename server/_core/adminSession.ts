@@ -1,10 +1,9 @@
-import { parse as parseCookieHeader } from "cookie";
+import { parse as parseCookieHeader, serialize as serializeCookie } from "cookie";
 import { SignJWT, jwtVerify } from "jose";
-import type { Request, Response } from "express";
 
 export const ADMIN_COOKIE_NAME = "chafhein_admin_session";
 const SESSION_TTL = "7d";
-const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 7;
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 export type AdminSession = { sub: string; email: string };
 
@@ -36,26 +35,38 @@ export async function verifyAdminSession(token: string): Promise<AdminSession | 
   }
 }
 
+// Next.js Route Handlers (via the tRPC fetch adapter) work with the standard
+// Fetch `Request`/`Headers` types rather than Express's `req`/`res`, so
+// cookie reads/writes go through the `cookie` package directly instead of
+// Express's `req.headers.cookie` / `res.cookie()` helpers.
+
 export function getAdminSessionToken(req: Request): string | undefined {
-  const cookies = parseCookieHeader(req.headers.cookie ?? "");
+  const cookies = parseCookieHeader(req.headers.get("cookie") ?? "");
   return cookies[ADMIN_COOKIE_NAME];
 }
 
-export function setAdminSessionCookie(res: Response, token: string) {
-  res.cookie(ADMIN_COOKIE_NAME, token, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: SESSION_MAX_AGE_MS,
-  });
+export function setAdminSessionCookie(resHeaders: Headers, token: string) {
+  resHeaders.append(
+    "Set-Cookie",
+    serializeCookie(ADMIN_COOKIE_NAME, token, {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: SESSION_MAX_AGE_SECONDS,
+    })
+  );
 }
 
-export function clearAdminSessionCookie(res: Response) {
-  res.clearCookie(ADMIN_COOKIE_NAME, {
-    httpOnly: true,
-    path: "/",
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+export function clearAdminSessionCookie(resHeaders: Headers) {
+  resHeaders.append(
+    "Set-Cookie",
+    serializeCookie(ADMIN_COOKIE_NAME, "", {
+      httpOnly: true,
+      path: "/",
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 0,
+    })
+  );
 }

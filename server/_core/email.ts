@@ -1,17 +1,32 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+const gmailUser = process.env.GMAIL_USER;
+const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+// Sent via Gmail SMTP rather than a transactional provider like Resend:
+// Resend's free sender can only deliver to the one email address the
+// account was signed up with until a domain is verified, which doesn't
+// work for arbitrary event registrants. Gmail SMTP has no such
+// restriction — it can send to anyone — at the cost of emails coming
+// from a personal-looking @gmail.com address instead of a branded
+// @chafhein.ng one. GMAIL_APP_PASSWORD is a 16-character App Password
+// (https://myaccount.google.com/apppasswords), not the account's login
+// password, and requires 2-Step Verification to be enabled.
+const transporter =
+  gmailUser && gmailAppPassword
+    ? nodemailer.createTransport({
+        service: "gmail",
+        auth: { user: gmailUser, pass: gmailAppPassword },
+      })
+    : null;
 
 // Who gets notified for donations and event registrations.
 const NOTIFY_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "info@chafhein.ng";
 
-// Resend's shared "onboarding@resend.dev" sender works without verifying a
-// domain, but can only deliver to the email address the Resend account was
-// signed up with. Once a domain is verified in the Resend dashboard, set
-// RESEND_FROM_EMAIL to a real address on that domain (e.g.
-// "CHAFHEIN <notifications@chafhein.ng>") to notify any recipient.
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "CHAFHEIN <onboarding@resend.dev>";
+// Gmail SMTP requires the `from` address to match the authenticated
+// account (it rejects/rewrites arbitrary from-addresses), so this is
+// always the Gmail account itself, just with a friendly display name.
+const FROM_EMAIL = gmailUser ? `CHAFHEIN <${gmailUser}>` : "CHAFHEIN";
 
 // CHAFHEIN brand palette (kept in sync with app/globals.css's :root block —
 // email clients can't read CSS variables, so these are inlined hex values).
@@ -57,16 +72,13 @@ async function sendBrandedEmail(
   html: string,
   context: string
 ): Promise<void> {
-  if (!resend) {
-    console.warn(`[Email] RESEND_API_KEY is not configured — skipping ${context} email`);
+  if (!transporter) {
+    console.warn(`[Email] GMAIL_USER/GMAIL_APP_PASSWORD is not configured — skipping ${context} email`);
     return;
   }
 
   try {
-    const { error } = await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
-    if (error) {
-      console.error(`[Email] Resend rejected the ${context} email:`, error);
-    }
+    await transporter.sendMail({ from: FROM_EMAIL, to, subject, html });
   } catch (error) {
     console.error(`[Email] Failed to send ${context} email:`, error);
   }

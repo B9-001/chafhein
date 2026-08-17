@@ -25,6 +25,15 @@ const BRAND = {
   muted: "#6B5B7A",
 };
 
+// Email clients load images from a real, public URL — they can't reach
+// localhost or bundled Next.js static assets directly. Hosted in Supabase
+// Storage (the same "media" bucket already used for campaign/event images)
+// so it resolves regardless of which domain the site itself is deployed to.
+const LOGO_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/media/email-assets/chafhein-logo.png`
+    : null;
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
@@ -81,9 +90,22 @@ function emailShell(opts: { preheader: string; heading: string; bodyHtml: string
         <td align="center">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px; background-color:${BRAND.white}; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(63,15,92,0.08);">
             <tr>
-              <td style="background-color:${BRAND.purple}; padding:28px 32px;">
-                <span style="color:${BRAND.white}; font-size:20px; font-weight:700; letter-spacing:0.5px; font-family:Georgia,serif;">CHAFHEIN</span>
-                <div style="height:3px; width:40px; background-color:${BRAND.gold}; margin-top:10px; border-radius:2px;"></div>
+              <td style="background-color:${BRAND.purple}; padding:24px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    ${
+                      LOGO_URL
+                        ? `<td style="padding-right:12px; vertical-align:middle;">
+                             <img src="${LOGO_URL}" alt="CHAFHEIN" width="36" height="36" style="display:block; width:36px; height:36px; object-fit:contain; border-radius:6px;" />
+                           </td>`
+                        : ""
+                    }
+                    <td style="vertical-align:middle;">
+                      <span style="color:${BRAND.white}; font-size:20px; font-weight:700; letter-spacing:0.5px; font-family:Georgia,serif;">CHAFHEIN</span>
+                      <div style="height:3px; width:40px; background-color:${BRAND.gold}; margin-top:8px; border-radius:2px;"></div>
+                    </td>
+                  </tr>
+                </table>
               </td>
             </tr>
             <tr>
@@ -166,6 +188,11 @@ export type EventRegistrationNotification = {
 export async function sendEventRegistrationNotification(
   registration: EventRegistrationNotification
 ): Promise<void> {
+  // Admin-facing: a plain "someone registered" notification. The "Join
+  // Webinar" call-to-action belongs only in the registrant's own
+  // confirmation email (sendEventRegistrationConfirmation, below) — the
+  // admin doesn't need a join button, just the fact of the registration
+  // (a plain-text link is included for reference, not as a CTA).
   const html = emailShell({
     preheader: `${registration.name} just registered for ${registration.eventTitle}`,
     heading: "New Event Registration",
@@ -176,6 +203,11 @@ export async function sendEventRegistrationNotification(
         ${infoRow("Email", escapeHtml(registration.email))}
         ${registration.phone ? infoRow("Phone", escapeHtml(registration.phone)) : ""}
         ${registration.webinarLink ? infoRow("Type", "Webinar") : ""}
+        ${
+          registration.webinarLink
+            ? infoRow("Webinar Link", `<a href="${escapeHtml(registration.webinarLink)}" style="color:${BRAND.purple}; word-break:break-all;">${escapeHtml(registration.webinarLink)}</a>`)
+            : ""
+        }
       </table>
     `,
     footerNote: "Sent automatically when someone registers for an event on the CHAFHEIN website.",

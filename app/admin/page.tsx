@@ -560,11 +560,26 @@ export default function AdminDashboard() {
                     <CardTitle>Activity</CardTitle>
                     <CardDescription>Submissions across the site</CardDescription>
                   </CardHeader>
-                  <CardContent className="grid grid-cols-2 gap-4">
-                    <StatCard label="Contacts" value={contacts.length.toLocaleString()} icon={Mail} />
-                    <StatCard label="Volunteers" value={volunteers.length.toLocaleString()} icon={Users} />
-                    <StatCard label="Registrations" value={registrations.length.toLocaleString()} icon={CalendarCheck} />
-                    <StatCard label="Active Campaigns" value={activeCampaignsCount.toLocaleString()} icon={Target} />
+                  <CardContent className="space-y-1">
+                    {[
+                      { label: "Contacts", value: contacts.length, icon: Mail },
+                      { label: "Volunteers", value: volunteers.length, icon: Users },
+                      { label: "Registrations", value: registrations.length, icon: CalendarCheck },
+                      { label: "Active Campaigns", value: activeCampaignsCount, icon: Target },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between gap-3 border-b border-border py-2.5 last:border-0 last:pb-0"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-accent">
+                            <item.icon className="h-4 w-4" />
+                          </span>
+                          <span className="truncate text-sm font-medium text-foreground">{item.label}</span>
+                        </div>
+                        <span className="shrink-0 text-lg font-semibold text-foreground">{item.value.toLocaleString()}</span>
+                      </div>
+                    ))}
                   </CardContent>
                 </Card>
 

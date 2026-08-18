@@ -9,6 +9,7 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { PaintSplash } from "@/components/PaintSplash";
+import { UpcomingPopup } from "@/components/UpcomingPopup";
 
 // react-paystack touches `window` outside of an event handler, which breaks
 // Next.js's server-side prerendering of this page. Loading it client-only
@@ -28,13 +29,13 @@ const services = [
   { icon: "🌍", title: "Community Health", desc: "Community-led health initiatives and awareness" },
 ];
 
-function formatNaira(value: string | number | null | undefined) {
+export function formatNaira(value: string | number | null | undefined) {
   const num = Number(value ?? 0);
   if (Number.isNaN(num)) return "₦0";
   return `₦${num.toLocaleString()}`;
 }
 
-function formatEventDate(value: string | null | undefined) {
+export function formatEventDate(value: string | null | undefined) {
   if (!value) return "";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
@@ -290,6 +291,8 @@ export default function Home() {
           box-shadow: 0 20px 40px rgba(124, 58, 237, 0.18);
         }
       `}</style>
+
+      <UpcomingPopup campaigns={campaigns} events={events} />
 
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-white shadow-sm border-b border-brand-cream-deep animate-fade-in-up">
